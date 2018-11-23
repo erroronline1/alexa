@@ -1,0 +1,219 @@
+{
+    "languageModel": {
+        "invocationName": "anne backt",
+        "intents": [
+            {
+                "name": "AMAZON.FallbackIntent",
+                "slots": [],
+                "samples": []
+            },
+            {
+                "name": "AMAZON.YesIntent",
+                "slots": [],
+                "samples": []
+            },
+            {
+                "name": "DEFAULT",
+                "slots": [],
+                "samples": []
+            },
+            {
+                "name": "NEW_RECEIPTS",
+                "slots": [
+                    {
+                        "name": "NUM",
+                        "type": "AMAZON.NUMBER"
+                    }
+                ],
+                "samples": [
+                    "was sind die neuesten {NUM} rezepte",
+                    "wie sind die neuesten {NUM} rezepte",
+                    "was sind die neuesten rezepte",
+                    "wie sind die neuesten rezepte",
+                    "was die neuesten {NUM} rezepte sind",
+                    "wie die neuesten {NUM} rezepte sind",
+                    "was die neuesten rezepte sind",
+                    "wie die neuesten rezepte sind",
+                    "nach den neuesten {NUM} rezepten",
+                    "nach den neuesten rezepten",
+                    "die neuesten rezepte",
+                    "die neuesten {NUM} rezepte",
+                    "was es neues gibt",
+                    "was gibt es neues"
+                ]
+            },
+            {
+                "name": "NEW_RECEIPT",
+                "slots": [],
+                "samples": [
+                    "nach dem neuesten rezept",
+                    "nach dem letzten rezept",
+                    "nach dem jüngsten rezept",
+                    "was das neueste rezept ist",
+                    "was das letzte rezept ist",
+                    "was ist das jüngste rezept"
+                ]
+            },
+            {
+                "name": "LOOKUP_RECEIPTS",
+                "slots": [
+                    {
+                        "name": "CONTAINS",
+                        "type": "CONTAINS"
+                    }
+                ],
+                "samples": [
+                    "rezepte mit {CONTAINS}",
+                    "gibt es rezepte mit {CONTAINS}",
+                    "gibt es was mit {CONTAINS}",
+                    "was gibt es mit {CONTAINS}",
+                    "was gibt es für rezepte mit {CONTAINS}",
+                    "welche rezepte gibt es mit {CONTAINS}",
+                    "gibt es ein rezept mit {CONTAINS}",
+                    "nach etwas mit {CONTAINS}",
+                    "nach einem rezept mit {CONTAINS}",
+                    "nach rezepten mit {CONTAINS}"
+                ]
+            },
+            {
+                "name": "SELECT_RECEIPT",
+                "slots": [
+                    {
+                        "name": "RECEIPT_NUMBER",
+                        "type": "AMAZON.NUMBER"
+                    }
+                ],
+                "samples": [
+                    "{RECEIPT_NUMBER}",
+                    "rezept {RECEIPT_NUMBER}",
+                    "rezept nummer {RECEIPT_NUMBER}",
+                    "zeige rezept {RECEIPT_NUMBER}",
+                    "zeige rezept nummer {RECEIPT_NUMBER}",
+                    "zeige mir rezept {RECEIPT_NUMBER}",
+                    "zeige mir rezept nummer {RECEIPT_NUMBER}",
+                    "zeige rezept {RECEIPT_NUMBER} an",
+                    "zeige rezept nummer {RECEIPT_NUMBER} an",
+                    "zeige mir rezept {RECEIPT_NUMBER} an",
+                    "zeige mir rezept nummer {RECEIPT_NUMBER} an",
+                    "das rezept {RECEIPT_NUMBER}",
+                    "das rezept nummer {RECEIPT_NUMBER}",
+                    "zeige das rezept {RECEIPT_NUMBER}",
+                    "zeige das rezept nummer {RECEIPT_NUMBER}",
+                    "zeige mir das rezept {RECEIPT_NUMBER}",
+                    "zeige mir das rezept nummer {RECEIPT_NUMBER}",
+                    "zeige das rezept {RECEIPT_NUMBER} an",
+                    "zeige das rezept nummer {RECEIPT_NUMBER} an",
+                    "zeige mir das rezept {RECEIPT_NUMBER} an",
+                    "zeige mir das rezept nummer {RECEIPT_NUMBER} an"
+                ]
+            },
+            {
+                "name": "SEND_RECEIPT",
+                "slots": [
+                    {
+                        "name": "RECEIPT_NUMBER",
+                        "type": "AMAZON.NUMBER"
+                    }
+                ],
+                "samples": [
+                    "schicke rezept {RECEIPT_NUMBER}",
+                    "schicke rezept nummer {RECEIPT_NUMBER}",
+                    "schicke mir rezept {RECEIPT_NUMBER}",
+                    "schicke mir rezept nummer {RECEIPT_NUMBER}",
+                    "schicke rezept {RECEIPT_NUMBER} per email",
+                    "schicke rezept nummer {RECEIPT_NUMBER} per email",
+                    "schicke mir rezept {RECEIPT_NUMBER} per email",
+                    "schicke mir rezept nummer {RECEIPT_NUMBER} per email",
+                    "schicke das rezept {RECEIPT_NUMBER}",
+                    "schicke das rezept nummer {RECEIPT_NUMBER}",
+                    "schicke mir das rezept {RECEIPT_NUMBER}",
+                    "schicke mir das rezept nummer {RECEIPT_NUMBER}",
+                    "schicke das rezept {RECEIPT_NUMBER} per email",
+                    "schicke das rezept nummer {RECEIPT_NUMBER} per email",
+                    "schicke mir das rezept {RECEIPT_NUMBER} per email",
+                    "schicke mir das rezept nummer {RECEIPT_NUMBER} per email"
+                ]
+            },
+            {
+                "name": "SECRET",
+                "slots": [],
+                "samples": [
+                    "was ist dein geheimnis",
+                    "hast du ein geheimnis",
+                    "hast du einen trick",
+                    "was ist dein trick",
+                    "verrätst du dein geheimnis",
+                    "verrätst du mir dein geheimnis",
+                    "verrätst du deinen trick",
+                    "verrätst du mir deinen trick",
+                    "nach ihrem geheimnis",
+                    "nach ihrem trick",
+                    "was ihr geheimnis ist"
+                ]
+            },
+            {
+                "name": "CRITICISE",
+                "slots": [],
+                "samples": [
+                    "ist das alles",
+                    "kannst du nicht mehr",
+                    "ist das alles was du kannst",
+                    "du bist blöd",
+                    "du kannst nichts"
+                ]
+            },
+            {
+                "name": "AMAZON.CancelIntent",
+                "slots": [],
+                "samples": [
+                    "nein",
+                    "hör auf",
+                    "es reicht",
+                    "genug",
+                    "stop",
+                    "halt"
+                ]
+            },
+            {
+                "name": "AMAZON.HelpIntent",
+                "slots": [],
+                "samples": [
+                    "hilfe",
+                    "oje"
+                ]
+            },
+            {
+                "name": "AMAZON.StopIntent",
+                "slots": [],
+                "samples": [
+                    "danke",
+                    "tschüss"
+                ]
+            }
+        ],
+        "types": [
+            {
+                "name": "CONTAINS",
+                "values": [
+                    {
+                        "id": "",
+                        "name": {
+                            "value": "mehl",
+                            "synonyms": [
+                                "weizen",
+                                "dinkel",
+                                "roggen",
+                                "sauerteig",
+                                "wasser",
+                                "milch",
+                                "käse",
+                                "salami",
+                                "schinken"
+                            ]
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}
