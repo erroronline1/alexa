@@ -68,17 +68,18 @@ class BasicFunctions{
 		$responseArray = [
 			'version' => '1.0',
 			'response' => [
-				'outputSpeech' => [
-					'type' => 'SSML',
-					'ssml' => '<speak>'.$output.'</speak>'
-				],
+				'outputSpeech' => ['type' => 'SSML', 'ssml' => '<speak>'.$output.'</speak>'],
 				'card'=>$card,
 				'reprompt'=>($reprompt?['outputSpeech'=>['type'=>'SSML', 'ssml'=>'<speak>'.$reprompt.'</speak>']]:false),
 				'shouldEndSession' => $reprompt?false:true //default setting because the certification staff nags all the time
 			],
 			'sessionAttributes'=>$sessionAttributes
 		];
-		header('Content-Type: application/json; Content-Length:'.strlen(json_encode($responseArray)).'; Authorisation: Bearer '.$accesstoken);
+//global $post;
+//		$ChefsekretaerinMysqli->query("INSERT INTO json_log VALUES ('',CURRENT_TIMESTAMP,'".$post."','".$responseArray."')");
+
+
+		header('Content-Type: application/json; Content-Length:'.strlen(json_encode($responseArray)).'; Authorisation: Bearer '.$AccessToken);
 		echo json_encode($responseArray);
 	}
 }
@@ -98,7 +99,7 @@ function debug($str, $where="json"){
 $ALEXA = new BasicFunctions(); //initialize basic functions - you don´t say!
 $output = "hallo welt"; // in case i forgot to initialize the variable
 
-//given parameters simplysfied (usual suspects)
+//given parameters simplyfied (usual suspects)
 $AccessToken = $post->context->System->apiAccessToken;
 $IntentName = $post->request->intent->name;
 

@@ -1,4 +1,4 @@
-<?php include ('alexabasics.php'); // basic functions library
+<?php include ('alexalibrary.php'); // basic functions library
 
 include ('nonpublic.php'); // application ids, database connections, etc.
 

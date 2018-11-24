@@ -1,0 +1,175 @@
+{
+    "interactionModel": {
+        "languageModel": {
+            "invocationName": "chefsekretärin",
+            "intents": [
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.HelpIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.StopIntent",
+                    "samples": []
+                },
+                {
+                    "name": "DEFAULT",
+                    "slots": [
+                        {
+                            "name": "WHERE",
+                            "type": "WHERE"
+                        },
+                        {
+                            "name": "BOSS",
+                            "type": "BOSS"
+                        }
+                    ],
+                    "samples": [
+                        "wer ist {WHERE} {BOSS}",
+                        "nach dem {BOSS}",
+                        "wer {WHERE} {BOSS} ist"
+                    ]
+                },
+                {
+                    "name": "NAME_REQUEST",
+                    "slots": [
+                        {
+                            "name": "NAME",
+                            "type": "AMAZON.DE_FIRST_NAME"
+                        },
+                        {
+                            "name": "WHERE",
+                            "type": "WHERE"
+                        },
+                        {
+                            "name": "BOSS",
+                            "type": "BOSS"
+                        }
+                    ],
+                    "samples": [
+                        "ist {NAME} {WHERE} {BOSS}",
+                        "ob {NAME} {WHERE} {BOSS} ist",
+                        "nach {NAME}",
+                        "ist {NAME} {BOSS}",
+                        "ob {NAME} {BOSS} ist"
+                    ]
+                },
+                {
+                    "name": "SELF_REQUEST",
+                    "slots": [
+                        {
+                            "name": "WHERE",
+                            "type": "WHERE"
+                        },
+                        {
+                            "name": "BOSS",
+                            "type": "BOSS"
+                        }
+                    ],
+                    "samples": [
+                        "bin ich {WHERE} {BOSS}",
+                        "ob ich {WHERE} {BOSS} bin"
+                    ]
+                },
+                {
+                    "name": "SELF_REQUEST_SET_NAME",
+                    "slots": [
+                        {
+                            "name": "NAME",
+                            "type": "AMAZON.DE_FIRST_NAME"
+                        }
+                    ],
+                    "samples": [
+                        "{NAME}",
+                        "ich bin {NAME}",
+                        "mein name ist {NAME}",
+                        "ich heiße {NAME}",
+                        "mein name lautet {NAME}",
+                        "dass ich {NAME} heiße",
+                        "dass mein name {NAME} ist",
+                        "ich bin der {NAME}",
+                        "ich bin die {NAME}"
+                    ]
+                },
+                {
+                    "name": "SELF_REQUEST_STORE_NAME",
+                    "slots": [
+                        {
+                            "name": "NAME",
+                            "type": "AMAZON.DE_FIRST_NAME"
+                        },
+                        {
+                            "name": "WHERE",
+                            "type": "WHERE"
+                        },
+                        {
+                            "name": "BOSS",
+                            "type": "BOSS"
+                        }
+                    ],
+                    "samples": [
+                        "ich bin {NAME} und ich bin {WHERE} {BOSS}",
+                        "mein name ist {NAME} und ich bin {WHERE} {BOSS}",
+                        "mein name ist {NAME} und ich bin {BOSS}",
+                        "ich bin {NAME} und ich bin {BOSS}"
+                    ]
+                }
+            ],
+            "types": [
+                {
+                    "name": "BOSS",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "der boss",
+                                "synonyms": [
+                                    "der bestimmer",
+                                    "der chef",
+                                    "die chefin",
+                                    "der könig",
+                                    "die königin",
+                                    "die bestimmerin"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "der stuhl",
+                                "synonyms": [
+                                    "die pfeife",
+                                    "eine quatschtüte",
+                                    "eine heulsuse",
+                                    "ein heulebaby",
+                                    "die prinzessin",
+                                    "der prinz",
+                                    "das auto",
+                                    "ein pferd",
+                                    "ein fenster",
+                                    "eine kuh",
+                                    "eine grüne wiese",
+                                    "eine blöde kuh"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "WHERE",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "hier",
+                                "synonyms": [
+                                    "zuhause"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}
