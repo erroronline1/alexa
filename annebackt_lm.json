@@ -170,7 +170,6 @@
                     "hör auf",
                     "es reicht",
                     "genug",
-                    "stop",
                     "halt"
                 ]
             },
@@ -187,7 +186,9 @@
                 "slots": [],
                 "samples": [
                     "danke",
-                    "tschüss"
+                    "tschüss",
+                    "abbrechen",
+                    "stop"
                 ]
             }
         ],
