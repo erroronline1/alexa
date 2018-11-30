@@ -134,7 +134,7 @@ elseif ($post->request->type=="IntentRequest"){
 		}
 	}
 	elseif ($IntentName=="SECRET"){
-		$output=$ALEXA->whisper('ich habe gar kein geheimnis.').' ich backe ein bisschen liebe mit ein und lasse dem teig nur die zeit die er braucht. jetzt bist du dran!';
+		$output=$ALEXA->whisper('ich habe gar kein geheimnis.').' ich backe ein bisschen liebe mit ein und lasse dem teig nur die zeit die er braucht. jetzt bist '.$ALEXA->emphase('du').' dran!';
 		$reprompt='du kannst das bestimmt auch. frag mich einfach nach meinen rezepten und probier eines aus. also?';
 	}
 	elseif ($IntentName=="CRITICISE"){
@@ -142,7 +142,7 @@ elseif ($post->request->type=="IntentRequest"){
 		$reprompt='meine kontaktdaten findest du auf annebackt.de.';
 	}
 	elseif ($IntentName=="AMAZON.StopIntent"){
-		$output='ich hoffe ich konnte helfen';
+		$output='ich hoffe ich konnte helfen.';
 	}
 	elseif ($IntentName=="AMAZON.HelpIntent"){
 		$output='dies ist ein skill der seite annebackt.de. stelle fragen wie: was sind die neuesten rezepte oder gibt es rezepte mit käse - wobei käse hier eine beliebige zutat ist. mehr optionen werden dir in der alexa-app angezeigt. versuchs mal!';
