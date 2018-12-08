@@ -123,7 +123,7 @@ elseif ($post->request->type=="IntentRequest"){
 			if ($receiptnumber && $post->session->attributes->SelectableReceipts){
 				$which=explode(",",$post->session->attributes->SelectableReceipts);
 				$entry=$mysqli->query("SELECT * FROM content WHERE id=".$which[$receiptnumber-1]." AND timestamp<=UNIX_TIMESTAMP() LIMIT 1")->fetch_assoc();
-				$raw='Das Rezept f&uuml;r <strong>'.utf8_decode($entry['titel']).'</strong> findest du unter dem Link<br /><a href="http://annebackt.de/?permalink='.$entry['timestamp'].'">http://annebackt.de/?permalink='.$entry['timestamp'].'</a><br />'
+				$raw='Das Rezept f&uuml;r <strong>'.utf8_decode($entry['titel']).'</strong> findest du unter dem Link<br /><a href="http://annebackt.de/?permalink='.base_convert($entry['timestamp'],10,16).'">http://annebackt.de/?permalink='.base_convert($entry['timestamp'],10,16).'</a><br />'
 				.'<br /><small>Du hast im Alexa-Skill die Freigabe zur Nutzung Deiner eMail-Adresse und zur Zusendung des Links erteilt.</small>';
 				if (send_email('asb@annebackt.de', 'Anne backt via Alexa Skill', $usermail, 'Rezept für '.$entry['titel'], '', $raw, False,'annebackt.de')) $output='die email wurde versandt. kann ich sonst noch etwas für dich tun?';
 				else $output='die mail konnte leider nicht versendet werden. versuche es später oder sag mir über annebackt.de bescheid. möchtest du andere rezepte zumindest angezeigt bekommen?';
@@ -165,8 +165,14 @@ elseif ($post->request->type=="IntentRequest"){
 		$reprompt='versuchs mal! frag mich nach dem neuesten rezept!';
 	}
 	elseif ($IntentName=="AMAZON.CancelIntent"){
-		$output='ok. kann ich was anderes für dich tun?';
-		$reprompt='was kann ich für dich tun?';
+		if ($post->session->attributes->PreviousCancel){
+			$output='dann nicht. ich hoffe ich konnte helfen.';
+		}
+		else {
+			$output='ok. kann ich was anderes für dich tun?';
+			$reprompt='was kann ich für dich tun?';
+			$sessionAttributes=['PreviousCancel'=>true];
+		}
 	}
 }
 
