@@ -11,6 +11,7 @@ $num=$post->request->intent->slots->NUM->value;
 $contains=$post->request->intent->slots->CONTAINS->value;
 $receiptnumber=$post->request->intent->slots->RECEIPT_NUMBER->value;
 
+
 include('../../asb/backend/project.library.php');
 
 if ($post->request->type=="LaunchRequest"){
@@ -68,7 +69,7 @@ elseif ($post->request->type=="IntentRequest"){
 				$sessionAttributes=['SelectableReceipts'=>substr($id,1),'YesIntentConfirms'=>'showreceipt'];
 			}
 			else{
-				$output='leider konnte ich keine rezepte mit '.$contains.' finden';
+				$output='leider konnte ich keine rezepte mit '.$contains.' finden. frag nach rezepten mit einer anderen zutat oder einfach nach den neuesten rezepten.';
 				$reprompt='frag nach rezepten mit einer anderen zutat oder einfach nach den neuesten rezepten.';
 			}
 		}
@@ -114,7 +115,7 @@ elseif ($post->request->type=="IntentRequest"){
 	elseif ($IntentName=="SEND_RECEIPT" || ($IntentName=="AMAZON.YesIntent" && $post->session->attributes->YesIntentConfirms=="sendreceipt")){
 		$usermail=$ALEXA->getemail($AccessToken);
 		if (!is_string($usermail) || $usermail=='null') {
-			$output='um dir das rezept per email zusenden zu können musst du für diesen skill in der alexa-app die freigabe zur verwendung deiner emailadresse erlauben.';
+			$output='um dir das rezept per email zusenden zu können musst du für diesen skill in der alexa-app die freigabe zur verwendung deiner emailadresse erlauben. soll ich dir bis dahin weitere rezepte anzeigen?';
 			$card=$ALEXA->askforemailpermission('Möchtest du Rezept-Links per eMail erhalten?');
 			$reprompt='möchtest du noch andere rezepte angezeigt bekommen?';
 		}
@@ -134,12 +135,19 @@ elseif ($post->request->type=="IntentRequest"){
 		}
 	}
 	elseif ($IntentName=="SECRET"){
-		$output=$ALEXA->whisper('ich habe gar kein geheimnis.').' ich backe ein bisschen liebe mit ein und lasse dem teig nur die zeit die er braucht. jetzt bist '.$ALEXA->emphase('du').' dran!';
-		$reprompt='du kannst das bestimmt auch. frag mich einfach nach meinen rezepten und probier eines aus. also?';
+		if ($post->request->intent->slots->TRICK->value){
+			$output=$ALEXA->whisper('ich habe gar kein '.$post->request->intent->slots->TRICK->value.'.').' ich backe ein bisschen liebe mit ein und lasse dem teig nur die zeit die er braucht. jetzt bist '.$ALEXA->emphase('du').' dran! frag nach einem rezept und probiere es aus!';
+			$reprompt='du kannst das bestimmt auch. frag mich einfach nach meinen rezepten und probier eines aus. also?';
+		}
+		else {
+			$output='ich kann dir nicht folgen. frag nach einem rezept und probiere es aus!';
+			$reprompt='frag mich einfach nach meinen rezepten und probier eines aus. also?';
+
+		}
 	}
 	elseif ($IntentName=="CRITICISE"){
-		$output=$ALEXA->interject('ey').'! wenn du vorschläge hast was anne backt noch können soll schreib mir eine email.';
-		$reprompt='meine kontaktdaten findest du auf annebackt.de.';
+		$output=$ALEXA->interject('ey').'! wenn du vorschläge hast was anne backt noch können soll schreib mir eine email. meine kontaktdaten findest du auf annebackt.de.';
+		//$reprompt='meine kontaktdaten findest du auf annebackt.de.';
 	}
 	elseif ($IntentName=="AMAZON.StopIntent"){
 		$output='ich hoffe ich konnte helfen.';
@@ -164,8 +172,12 @@ elseif ($post->request->type=="IntentRequest"){
 		];
 		$reprompt='versuchs mal! frag mich nach dem neuesten rezept!';
 	}
-	elseif ($IntentName=="AMAZON.CancelIntent"){
-		if ($post->session->attributes->PreviousCancel){
+	elseif ($IntentName=="AMAZON.CancelIntent" || ($post->session->attributes->PreviousCancel && $IntentName=="AMAZON.YesIntent")){
+		if ($post->session->attributes->PreviousCancel && $IntentName=="AMAZON.YesIntent"){
+			$output='dann frag mich! oder nach hilfe.';
+			$reprompt='was kann ich für dich tun?';
+		}
+		elseif ($post->session->attributes->PreviousCancel){
 			$output='dann nicht. ich hoffe ich konnte helfen.';
 		}
 		else {
