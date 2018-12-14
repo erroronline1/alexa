@@ -136,19 +136,23 @@
             },
             {
                 "name": "SECRET",
-                "slots": [],
+                "slots": [
+                    {
+                        "name": "TRICK",
+                        "type": "TRICK"
+                    }
+                ],
                 "samples": [
-                    "was ist dein geheimnis",
-                    "hast du ein geheimnis",
-                    "hast du einen trick",
-                    "was ist dein trick",
-                    "verrätst du dein geheimnis",
-                    "verrätst du mir dein geheimnis",
-                    "verrätst du deinen trick",
-                    "verrätst du mir deinen trick",
-                    "nach ihrem geheimnis",
-                    "nach ihrem trick",
-                    "was ihr geheimnis ist"
+                    "was ist dein {TRICK}",
+                    "hast du ein {TRICK}",
+                    "hast du einen {TRICK}",
+                    "was ist dein {TRICK}",
+                    "verrätst du dein {TRICK}",
+                    "verrätst du mir dein {TRICK}",
+                    "verrätst du deinen {TRICK}",
+                    "verrätst du mir deinen {TRICK}",
+                    "nach ihrem {TRICK}",
+                    "was ihr {TRICK} ist"
                 ]
             },
             {
@@ -210,6 +214,21 @@
                                 "salami",
                                 "schinken",
                                 "buttermilch"
+                            ]
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "TRICK",
+                "values": [
+                    {
+                        "id": "",
+                        "name": {
+                            "value": "geheimnis",
+                            "synonyms": [
+                                "trick",
+                                "kniff"
                             ]
                         }
                     }
