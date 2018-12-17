@@ -118,6 +118,7 @@ elseif ($post->request->type=="IntentRequest"){
 			$output='um dir das rezept per email zusenden zu können musst du für diesen skill in der alexa-app die freigabe zur verwendung deiner emailadresse erlauben. soll ich dir bis dahin weitere rezepte anzeigen?';
 			$card=$ALEXA->askforemailpermission('Möchtest du Rezept-Links per eMail erhalten?');
 			$reprompt='möchtest du noch andere rezepte angezeigt bekommen?';
+			$sessionAttributes=['UnusedConfirmation'=>true];
 		}
 		else {
 			$receiptnumber=$receiptnumber?:1;
@@ -130,7 +131,7 @@ elseif ($post->request->type=="IntentRequest"){
 				else $output='die mail konnte leider nicht versendet werden. versuche es später oder sag mir über annebackt.de bescheid. möchtest du andere rezepte zumindest angezeigt bekommen?';
 			}
 			else $output='ich weiß nicht welches rezept ich dir zusenden soll. frag mich nochmal!';
-			$sessionAttributes=[];
+			$sessionAttributes=['UnusedConfirmation'=>true];
 			$reprompt='möchtest du noch andere rezepte angezeigt oder zugeschickt bekommen?';
 		}
 	}
@@ -172,18 +173,18 @@ elseif ($post->request->type=="IntentRequest"){
 		];
 		$reprompt='versuchs mal! frag mich nach dem neuesten rezept!';
 	}
-	elseif ($IntentName=="AMAZON.CancelIntent" || ($post->session->attributes->PreviousCancel && $IntentName=="AMAZON.YesIntent")){
-		if ($post->session->attributes->PreviousCancel && $IntentName=="AMAZON.YesIntent"){
+	elseif ($IntentName=="AMAZON.CancelIntent" || ($post->session->attributes->UnusedConfirmation && $IntentName=="AMAZON.YesIntent")){
+		if ($post->session->attributes->UnusedConfirmation && $IntentName=="AMAZON.YesIntent"){
 			$output='dann frag mich! oder nach hilfe.';
 			$reprompt='was kann ich für dich tun?';
 		}
-		elseif ($post->session->attributes->PreviousCancel){
+		elseif ($post->session->attributes->UnusedConfirmation){
 			$output='dann nicht. ich hoffe ich konnte helfen.';
 		}
 		else {
 			$output='ok. kann ich was anderes für dich tun?';
 			$reprompt='was kann ich für dich tun?';
-			$sessionAttributes=['PreviousCancel'=>true];
+			$sessionAttributes=['UnusedConfirmation'=>true];
 		}
 	}
 }
