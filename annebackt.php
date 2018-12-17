@@ -178,13 +178,13 @@ elseif ($post->request->type=="IntentRequest"){
 			$output='dann frag mich! oder nach hilfe.';
 			$reprompt='was kann ich für dich tun?';
 		}
-		elseif ($post->session->attributes->UnusedConfirmation){
+		elseif ($post->session->attributes->previousCancel){
 			$output='dann nicht. ich hoffe ich konnte helfen.';
 		}
 		else {
 			$output='ok. kann ich was anderes für dich tun?';
 			$reprompt='was kann ich für dich tun?';
-			$sessionAttributes=['UnusedConfirmation'=>true];
+			$sessionAttributes=['previousCancel'=>true];
 		}
 	}
 }
