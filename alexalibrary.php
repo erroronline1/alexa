@@ -103,7 +103,7 @@ function debug($str, $where="json"){
 	}
 	
 $ALEXA = new BasicFunctions(); //initialize basic functions - you don´t say!
-$output = "hallo welt"; // in case i forgot to initialize the variable
+$output = "was kann ich für dich tun?"; // in case i forgot to initialize the variable
 
 //given parameters simplyfied (usual suspects)
 $AccessToken = $post->context->System->apiAccessToken;
