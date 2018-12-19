@@ -10,7 +10,9 @@ the skills are mostly in german language. not the sourcecode and variable names 
 ## chefsekretaerin
 this is my first skill where one can ask who makes the rules. the name can be set.
 it contains session-variables, storing and fetching database information on the endpoint. the use of the alexa-libray was implemented later, for some reason it was not fully possible, but it works now.
+[live skill](https://www.amazon.de/dp/B07B6NVYQP/)
 
 ## annebackt
 my second skill is capable of asking for recent entries of the baking-blog of my wife. one can display the receipts within the alexa-app and send a link via email.
 it contains session variables and email-permission handling.
+[live skill](https://www.amazon.de/dp/B07LGDL4BV)
