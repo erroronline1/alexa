@@ -76,6 +76,27 @@
                 ]
             },
             {
+                "name": "LOOKUP_RECEIPTS2",
+                "slots": [
+                    {
+                        "name": "CONTAINS",
+                        "type": "CONTAINS"
+                    }
+                ],
+                "samples": [
+                    "rezepte für {CONTAINS}",
+                    "gibt es rezepte für {CONTAINS}",
+                    "gibt es was für {CONTAINS}",
+                    "was gibt es für {CONTAINS}",
+                    "was gibt es für rezepte für {CONTAINS}",
+                    "welche rezepte gibt es für {CONTAINS}",
+                    "gibt es ein rezept für {CONTAINS}",
+                    "nach etwas für {CONTAINS}",
+                    "nach einem rezept für {CONTAINS}",
+                    "nach rezepten für {CONTAINS}"
+                ]
+            },
+            {
                 "name": "SELECT_RECEIPT",
                 "slots": [
                     {
@@ -212,7 +233,10 @@
                                 "käse",
                                 "salami",
                                 "schinken",
-                                "buttermilch"
+                                "buttermilch",
+                                "toast",
+                                "brötchen",
+                                "roggenbrot"
                             ]
                         }
                     }
