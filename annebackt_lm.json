@@ -87,7 +87,7 @@
                 ]
             },
             {
-                "name": "LOOKUP_RECEIPTS2",
+                "name": "LOOKUP_RECEIPTS_BY_TITLE",
                 "slots": [
                     {
                         "name": "CONTAINS",
