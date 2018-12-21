@@ -55,6 +55,17 @@
                 ]
             },
             {
+                "name": "SURPRISE",
+                "slots": [],
+                "samples": [
+                    "überrasch mich",
+                    "überrasche mich",
+                    "irgendwas",
+                    "irgendein rezept",
+                    "nach irgendeinem rezept"
+                ]
+            },
+            {
                 "name": "LOOKUP_RECEIPTS",
                 "slots": [
                     {
