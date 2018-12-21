@@ -26,13 +26,17 @@ elseif ($post->request->type=="IntentRequest"){
 		$output='was kann ich für dich tun?';
 		$reprompt=$ALEXA->interject('hey').'! wenn du nicht weiter weißt, frag nach hilfe.';
 	}
-	elseif ($IntentName=="NEW_RECEIPTS" || $IntentName=="NEW_RECEIPT"){
-		if ($IntentName=="NEW_RECEIPTS") $num=$num?:3;
-		elseif ($IntentName=="NEW_RECEIPT") $num=1;
-		$list=$mysqli->query("SELECT * FROM content WHERE timestamp<=UNIX_TIMESTAMP() ORDER BY timestamp DESC LIMIT ".$num);
+	elseif ($IntentName=="NEW_RECEIPTS" || $IntentName=="NEW_RECEIPT" || $IntentName=="SURPRISE"){
+		if ($IntentName=="NEW_RECEIPTS") $orderlimit ='ORDER BY timestamp DESC LIMIT '.($num?:3);
+		elseif ($IntentName=="NEW_RECEIPT") $orderlimit ='ORDER BY timestamp DESC LIMIT 1';
+		elseif ($IntentName=="SURPRISE") $orderlimit ='ORDER BY RAND() LIMIT 1';
+		$list=$mysqli->query("SELECT * FROM content WHERE timestamp<=UNIX_TIMESTAMP()  ".$orderlimit);
 		if ($list->num_rows>0) {
 			if ($list->num_rows>1) $output='die neuesten '.$list->num_rows.' rezepte sind:';
-			else $output='das neueste rezept ist:';
+			else {
+				if ($IntentName=="NEW_RECEIPT") $output='das neueste rezept ist:';
+				elseif ($IntentName=="SURPRISE") $output='wie wäre es mit:';
+			}
 			while($entry = $list->fetch_assoc()){
 				$output.= (++$items<$list->num_rows || $list->num_rows<2 ? ', ' : " und ").($list->num_rows>1?$ALEXA->number($items.'.'):'').' '.utf8_encode($entry['titel']).' vom '.$ALEXA->date(date('d.m',$entry['timestamp']));
 				$id.=','.$entry['id'];
@@ -49,11 +53,14 @@ elseif ($post->request->type=="IntentRequest"){
 		}
 		else $output='leider konnte ich keine neuen rezepte finden';
 	}
-	elseif ($IntentName=="LOOKUP_RECEIPTS"){
+	elseif ($IntentName=="LOOKUP_RECEIPTS" || $IntentName=="LOOKUP_RECEIPTS_BY_TITLE"){
 		if ($contains){
-			$list=$mysqli->query("SELECT * FROM content WHERE text LIKE '%".$contains."%' AND timestamp<=UNIX_TIMESTAMP() ORDER BY timestamp DESC");
+			$column=$IntentName=="LOOKUP_RECEIPTS"?'text':'titel';
+			$list=$mysqli->query("SELECT * FROM content WHERE ".$column." LIKE '%".$contains."%' AND timestamp<=UNIX_TIMESTAMP() ORDER BY timestamp DESC");
 			if ($list->num_rows) {
-				$output='es gibt '.$list->num_rows.' rezepte mit '.$contains.': ';
+				$output=$IntentName=="LOOKUP_RECEIPTS"?
+						'es gibt '.$list->num_rows.' rezepte mit '.$contains.': ':
+						'es gibt '.$list->num_rows.' rezepte für '.$contains.': ';
 				while($entry = $list->fetch_assoc()){
 					$output.= (++$items<$list->num_rows || $list->num_rows<2 ? ', ' : " und ").($list->num_rows>1?$ALEXA->number($items.'.'):'').' '.utf8_encode($entry['titel']).' vom '.$ALEXA->date(date('d.m',$entry['timestamp']));
 					$id.=','.$entry['id'];
@@ -75,7 +82,7 @@ elseif ($post->request->type=="IntentRequest"){
 		}
 		else {
 			$output='ich habe dich leider nicht verstanden.';
-			$reprompt='ich habe deine zutat nicht verstanden. frag nochmal oder einfach nach den neuesten rezepten.';
+			$reprompt='ich habe deinen rezeptwunsch nicht verstanden. frag nochmal oder einfach nach den neuesten rezepten.';
 		}
 	}
 	elseif ($IntentName=="SELECT_RECEIPT" || ($IntentName=="AMAZON.YesIntent" && $post->session->attributes->YesIntentConfirms=="showreceipt")){
@@ -137,7 +144,7 @@ elseif ($post->request->type=="IntentRequest"){
 	}
 	elseif ($IntentName=="SECRET"){
 		if ($post->request->intent->slots->TRICK->value){
-			$output=$ALEXA->whisper('ich habe gar kein '.$post->request->intent->slots->TRICK->value.'.').' ich backe ein bisschen liebe mit ein und lasse dem teig nur die zeit die er braucht. jetzt bist '.$ALEXA->emphase('du').' dran! frag nach einem rezept und probiere es aus!';
+			$output=$ALEXA->whisper('ich habe gar kein '.$post->request->intent->slots->TRICK->value.'.').' ich backe ein bisschen liebe mit ein und lasse dem teig nur die zeit die er braucht. jetzt bist '.$ALEXA->phoneme('du','\'duu').' dran! frag nach einem rezept und probiere es aus!';
 			$reprompt='du kannst das bestimmt auch. frag mich einfach nach meinen rezepten und probier eines aus. also?';
 		}
 		else {
