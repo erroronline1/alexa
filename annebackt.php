@@ -171,6 +171,8 @@ elseif ($post->request->type=="IntentRequest"){
 			'text'=>"Frag:\r\n\"Was gibt es neues?\"\r\n"
 			."\"Was sind die neuesten (z.B. 5) Rezepte?\"\r\n"
 			."\"Gibt es ein Rezept mit (Zutat)?\"\r\n"
+			."\"Gibt es ein Rezept für (z.B.) Toast?\"\r\n"
+			."\"Überrasch mich!\"\r\n"
 			."\"Was ist das neueste Rezept?\"\r\n \r\n"
 			."Du kannst dir die Rezepte in der App anzeigen und per eMail zusenden lassen. "
 			."Wenn es mehr als ein Rezept auf deine Frage hin gibt sage\r\n"
