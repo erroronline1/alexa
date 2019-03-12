@@ -65,7 +65,9 @@ class BasicFunctions{
 		global $output;
 		global $sessionAttributes;
 		global $AccessToken;
+		global $display;
 		global $debugger;
+		global $post;
 		
 		$responseArray = [
 			'version' => '1.0',
@@ -76,7 +78,9 @@ class BasicFunctions{
 		];
 		// tidy addition of properties in case they exist
 		if ($card) $responseArray['response']['card']=$card;
-		if ($repropt) $responseArray['response']['reprompt']=['outputSpeech'=>['type'=>'SSML', 'ssml'=>'<speak>'.$reprompt.'</speak>']];
+		if ($reprompt) $responseArray['response']['reprompt']=['outputSpeech'=>['type'=>'SSML', 'ssml'=>'<speak>'.$reprompt.'</speak>']];
+
+		if ($post->context->System->device->supportedInterfaces->Display && $display) $responseArray['response']['directives']=$display;
 		if ($sessionAttributes) $responseArray['sessionAttributes']=$sessionAttributes;
 
 		if ($debugger){ // dev-mode mysqli_connect-object for logging in- and output
