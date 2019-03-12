@@ -34,7 +34,7 @@ class BasicFunctions{
 	}
 
 	// email handling
-	function askforemailpermission($title='Für deine Anfrage ist deine eMail-adresse erforderlich.'){
+	function askforemailpermission($title='Für deine Anfrage ist deine eMail-Adresse erforderlich.'){
 		return ['type'=>'AskForPermissionsConsent',
 		'title'=>$title,
 		'permissions'=> [ "alexa::profile:email:read" ]
