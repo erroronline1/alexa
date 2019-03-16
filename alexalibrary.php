@@ -81,13 +81,11 @@ class BasicFunctions{
 		if ($reprompt) $responseArray['response']['reprompt']=['outputSpeech'=>['type'=>'SSML', 'ssml'=>'<speak>'.$reprompt.'</speak>']];
 
 		if ($post->context->System->device->supportedInterfaces->Display && $display) $responseArray['response']['directives']=$display;
-		debug($display);
 		if ($sessionAttributes) $responseArray['sessionAttributes']=$sessionAttributes;
 		if ($debugger){ // dev-mode mysqli_connect-object for logging in- and output
 			global $post;
 			$debugger->query("INSERT INTO json_log VALUES ('',CURRENT_TIMESTAMP,'".serialize($post)."','".serialize($responseArray)."')");
 		}
-
 
 		header('Content-Type: application/json; Content-Length:'.strlen(json_encode($responseArray)).'; Authorisation: Bearer '.$AccessToken);
 		echo json_encode($responseArray);
