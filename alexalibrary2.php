@@ -85,8 +85,8 @@ class OutputFunctions{
 			'type'=>'Standard',
 			'title'=>$this->card->title,
 			'image'=> [
-				'smallImageUrl'=> "https://armprothetik.info/assistant/sslmedia.php?".$this->card->image,
-				'largeImageUrl'=> "https://armprothetik.info/assistant/sslmedia.php?".$this->card->image
+				'smallImageUrl'=> $this->card->image,
+				'largeImageUrl'=> $this->card->image
 			],
 			'text'=>$this->card->text
 		];
@@ -95,7 +95,7 @@ class OutputFunctions{
 		if ($post->context->System->device->supportedInterfaces->Display && $this->display) $responseArray['response']['directives']=$this->display;
 		if ($this->sessionAttributes) $responseArray['sessionAttributes']=$this->sessionAttributes;
 		
-		if (debugger){ // dev-mode mysqli_connect-object for logging in- and output
+		if ($debugger){ // dev-mode mysqli_connect-object for logging in- and output
 			global $post;
 			$debugger->query("INSERT INTO json_log VALUES ('',CURRENT_TIMESTAMP,'".serialize($post)."','".serialize($responseArray)."')");
 		}
@@ -107,13 +107,13 @@ class OutputFunctions{
 
 function debug($str, $where="json"){
 // might come in handy once in a while
+	global $OUTPUT;
 	if ($where=="card") {
-		global $card;
-		$card=['type'=>'Simple', 'title'=>'skill debugging', 'content'=>$str ];
+		$OUTPUT->card->title='skill debugging';
+		$OUTPUT->card->text=$str;
 	}
 	else {
-		global $sessionAttributes;
-		$sessionAttributes['DebugInfo']=$str;
+		$OUTPUT->sessionAttributes['DebugInfo']=$str;
 	}
 }
 

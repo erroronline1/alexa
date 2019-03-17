@@ -35,7 +35,7 @@ if ($post->request->type=="LaunchRequest"){
 	$OUTPUT->reprompt='wenn du nicht weiter weißt frag nach hilfe.';
 }
 elseif ($post->request->type=='SessionEndedRequest') {
-	$OUTPUT->speak='dann bis bald. ich hoffe ich konnte helfen';
+	$OUTPUT->speak='dann bis bald. ich hoffe ich konnte helfen.';
 }
 elseif ($post->request->type=="IntentRequest"){
 	if ($IntentName=="DEFAULT" || $IntentName=="AMAZON.FallbackIntent"){
@@ -163,7 +163,7 @@ elseif ($post->request->type=="IntentRequest"){
 
 			$OUTPUT->speak='das rezept für '.utf8_encode($entry['titel']).' wird in deiner alexa-app bei den aktivitäten angezeigt. möchtest du den link zu dem rezept per email zugesandt bekommen?';
             $OUTPUT->card->title='Rezept für '.utf8_encode($entry['titel']);
-            $OUTPUT->card->image=$image;
+            $OUTPUT->card->image="https://armprothetik.info/assistant/sslmedia.php?".$image;
             $OUTPUT->card->text=utf8_encode($entry['text'])."\r\n \r\nEin Rezept von annebackt.de";
 
 			$OUTPUT->reprompt='kann ich sonst noch etwas für dich tun?';
@@ -215,7 +215,7 @@ elseif ($post->request->type=="IntentRequest"){
 	elseif ($IntentName=="AMAZON.HelpIntent"){
 		$OUTPUT->speak='dies ist ein skill der seite annebackt.de. stelle fragen wie: was sind die neuesten rezepte oder gibt es rezepte mit käse - wobei käse hier eine beliebige zutat ist. mehr optionen werden dir in der alexa-app angezeigt. versuchs mal!';
         $OUTPUT->card->title='Was kann der Annebackt.de-Skill?';
-        $OUTPUT->card->image='../../asb/design/icon256x256.png';
+        $OUTPUT->card->image="https://armprothetik.info/assistant/sslmedia.php?../../asb/design/icon256x256.png";
 		$OUTPUT->card->text="Frag:\r\n\"Was gibt es neues?\"\r\n"
 			."\"Was sind die neuesten (z.B. 5) Rezepte?\"\r\n"
 			."\"Gibt es ein Rezept mit (Zutat)?\"\r\n"
@@ -280,7 +280,6 @@ elseif ($post->request->type=="IntentRequest"){
 		}
 	}
 }
-
 
 $OUTPUT->answer();
 } else $ALEXA->verificationfailed();
