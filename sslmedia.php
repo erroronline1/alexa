@@ -1,7 +1,7 @@
 <?php
 $query=$query=array_keys($_GET);
 
-$query[0]=str_replace(["__/","_p","__"],["../",".p","_."], $query[0]);
+$query[0]=str_replace(["__/","_p","_j","__"],["../",".p",".j","_."], $query[0]);
 if (file_exists($query[0])) {
     header('Content-Type: '.mime_content_type($query[0]));
     header("Content-Disposition: inline; filename=".$query[0]);
