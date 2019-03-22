@@ -77,19 +77,12 @@ elseif ($post->request->type=="IntentRequest"){
 				$OUTPUT->reprompt='möchtest du das rezept angezeigt bekommen?';
 			}
 
-			$OUTPUT->display=[[
-				'type'=> "Display.RenderTemplate",
-				'template'=> [
-					'type'=> 'ListTemplate2',
-					'token'=> "neue_rezepte",
-					'title'=> $t_display['title'],
-					'listItems'=>$t_display['items']
-				]
-			],
-			[
-				'type'=>'Hint',
-				'hint'=> ['type'=> 'PlainText', 'text'=>'Zeige Rezept Nummer 1.']
-			]];
+			$OUTPUT->display->displaytemplate='ListTemplate2';
+			$OUTPUT->display->token='neue_rezepte';
+			$OUTPUT->display->title=$t_display['title'];
+			$OUTPUT->display->items=$t_display['items'];
+			$OUTPUT->display->hint='Zeige Rezept Nummer 1';
+
 			$OUTPUT->sessionAttributes=['SelectableReceipts'=>substr($id,1),'YesIntentConfirms'=>'showreceipt'];
 		}
 		else $OUTPUT->speak='leider konnte ich keine neuen rezepte finden';
@@ -127,19 +120,11 @@ elseif ($post->request->type=="IntentRequest"){
 					$OUTPUT->reprompt='möchtest du das rezept angezeigt bekommen?';
 				}
 
-				$OUTPUT->display=[[
-					'type'=> "Display.RenderTemplate",
-					'template'=> [
-						'type'=> 'ListTemplate2',
-						'token'=> "zutaten_rezepte",
-						'title'=> $t_display['title'],
-						'listItems'=>$t_display['items']
-					]
-				],
-				[
-					'type'=>'Hint',
-					'hint'=> ['type'=> 'PlainText', 'text'=>'Zeige Rezept Nummer 1.']
-				]];
+				$OUTPUT->display->displaytemplate='ListTemplate2';
+				$OUTPUT->display->token='zutaten_rezepte';
+				$OUTPUT->display->title=$t_display['title'];
+				$OUTPUT->display->items=$t_display['items'];
+				$OUTPUT->display->hint='Zeige Rezept Nummer 1';
 
 				$OUTPUT->sessionAttributes=['SelectableReceipts'=>substr($id,1),'YesIntentConfirms'=>'showreceipt'];
 			}
@@ -227,42 +212,23 @@ elseif ($post->request->type=="IntentRequest"){
 			."\"Zeige mir Rezept Nummer (z.B.) zwei.\" oder \r\n"
 			."\"Schicke mir Rezept drei.\"\r\n \r\n"
 			."Zur Nutzung der eMail-Funktion musst du dem Skill die Freigabe erteilen.";
-		$OUTPUT->display=[[
-			'type'=> "Display.RenderTemplate",
-			'template'=> [
-				'type'=> 'BodyTemplate3',
-				'token'=> "hilfe",
-				'backButton'=> "VISIBLE",
-				'image'=> [
-					'contentDescription'=>'icon',
-					'sources'=>[[
-						'url'=>"https://armprothetik.info/assistant/sslmedia.php?../../asb/design/icon256x256.png"
-					]]
-				],
-				'title'=> 'Was kann der Annebackt.de-Skill?',
-				'textContent'=>[
-					'primaryText'=>['text'=>"<font size=\"3\">"
-					."Frag:<br/>\"Was gibt es neues?\"<br/>"
-					."\"Was sind die neuesten (z.B. 5) Rezepte?\"<br/>"
-					."\"Gibt es ein Rezept mit (Zutat)?\"<br/>"
-					."\"Gibt es ein Rezept für (z.B.) Toast?\"<br/>"
-					."\"Überrasch mich!\"<br/>"
-					."\"Was ist das neueste Rezept?\"<br/><br/>"
-					."Du kannst dir die Rezepte in der App anzeigen und per eMail zusenden lassen. "
-					."Wenn es mehr als ein Rezept auf deine Frage hin gibt sage<br/>"
-					."\"Zeige mir Rezept Nummer (z.B.) zwei.\" oder <br/>"
-					."\"Schicke mir Rezept drei.\"<br/><br/>"
-					."Zur Nutzung der eMail-Funktion musst du dem Skill die Freigabe erteilen."
-					."</font>",'type'=>'RichText'],
-					//'secondaryText'=>['text'=>"aber immerhin",'type'=>'PlainText'],
-					//'tertiaryText'=>['text'=>"aber immerhin",'type'=>'PlainText'],
-				]
-			]
-		],
-		[
-			'type'=>'Hint',
-			'hint'=> ['type'=> 'PlainText', 'text'=>'Hinweis']
-		]];
+
+		$OUTPUT->display->displaytemplate='BodyTemplate1';
+		$OUTPUT->display->token='hilfe';
+		$OUTPUT->display->title='Was kann der Annebackt.de-Skill?';
+		$OUTPUT->display->text='<font size="1">'
+			.'Frag:<br/>"Was gibt es neues?"<br/>'
+			.'"Was sind die neuesten (z.B. 5) Rezepte?"<br/>'
+			.'"Gibt es ein Rezept mit (Zutat)?"<br/>'
+			.'"Gibt es ein Rezept für (z.B.) Toast?"<br/>'
+			.'"Überrasch mich!"<br/>'
+			.'"Was ist das neueste Rezept?"<br/><br/>'
+			.'Du kannst dir die Rezepte in der App anzeigen und per eMail zusenden lassen. '
+			.'Wenn es mehr als ein Rezept auf deine Frage hin gibt sage<br/>'
+			.'"Zeige mir Rezept Nummer (z.B.) zwei." oder <br/>'
+			.'"Schicke mir Rezept drei."<br/><br/>'
+			.'Zur Nutzung der eMail-Funktion musst du dem Skill die Freigabe erteilen.'
+			.'</font>';
 		$OUTPUT->reprompt='versuchs mal! frag mich nach dem neuesten rezept!';
 	}
 	elseif ($IntentName=="AMAZON.CancelIntent" || ($post->session->attributes->UnusedConfirmation && $IntentName=="AMAZON.YesIntent")){
