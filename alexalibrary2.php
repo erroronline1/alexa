@@ -62,10 +62,16 @@ class BasicFunctions{
 
 class OutputFunctions{
 	// create final processed output
+
+	function debug($str, $where="json"){
+		// might come in handy once in a while, shows debugging info in developer console
+			$this->sessionAttributes['DebugInfo']=$str;
+	}
 		
 	function answer(){
 		global $AccessToken;
 		global $debugger;
+		global $post;
 
 		$responseArray = [
 			'version' => '1.0',
@@ -81,7 +87,8 @@ class OutputFunctions{
 				'ssml'=>'<speak>'.$this->reprompt.'</speak>'
 			]
 		];
-		if ($this->card) $responseArray['response']['card']=[
+
+		if (false && $this->card) $responseArray['response']['card']=[
 			'type'=>'Standard',
 			'title'=>$this->card->title,
 			'image'=> [
@@ -90,30 +97,132 @@ class OutputFunctions{
 			],
 			'text'=>$this->card->text
 		];
+
 		if ($this->permission) $responseArray['response']['card']=$this->permission;
 
-		if ($post->context->System->device->supportedInterfaces->Display && $this->display) $responseArray['response']['directives']=$this->display;
+		if (false && $post->context->System->device->supportedInterfaces->Alexa.Presentation.APL && $this->display) $responseArray['response']['directives']=[
+			'type'=>'Alexa.Presentation.APL.RenderDocument',
+			'token'=>$this->display->token,
+			'document'=> ['type'=> 'APL', 'version'=> '1.0', 'theme'=> 'auto',
+				'mainTemplate'=> ['description'=> 'APL Document','parameters'=> ['payload'], 'items'=> [
+						[
+							'type'=> 'Container',
+							'direction'=> 'column',
+							'width'=> '100%',
+							'height'=> '100%',
+						]
+					]
+				]
+			],
+			'datasources'=> [
+				$this->display->apltemplate => [
+					'type'=> 'object',
+					'objectId'=> $this->display->token,
+					'backgroundImage'=> [
+						'contentDescription'=> null,
+						'smallSourceUrl'=> null,
+						'largeSourceUrl'=> null,
+						'sources'=> [
+							[
+								'url'=> $this->display->bgimage,
+								'size'=> 'small',
+								'widthPixels'=> 0,
+								'heightPixels'=> 0
+							],
+							[
+								'url'=> $this->display->bgimage,
+								'size'=> 'large',
+								'widthPixels'=> 0,
+								'heightPixels'=> 0
+							]
+						]
+					],
+					'title'=> $this->display->title,
+					'image'=> [
+						'contentDescription'=> null,
+						'smallSourceUrl'=> null,
+						'largeSourceUrl'=> null,
+						'sources'=> [
+							[
+								'url'=> $this->display->image,
+								'size'=> 'small',
+								'widthPixels'=> 0,
+								'heightPixels'=> 0
+							],
+							[
+								'url'=> $this->display->image,
+								'size'=> 'large',
+								'widthPixels'=> 0,
+								'heightPixels'=> 0
+							]
+						]
+					],
+					'textContent'=> [
+/*						'title'=> [
+							'type'=> 'PlainText',
+							'text'=> ''
+						],
+						'subtitle'=> [
+							'type'=> 'PlainText',
+							'text'=> ''
+						],*/
+						'primaryText'=> [
+							'type'=> 'RichText',
+							'text'=> 'null'//$this->display->text
+						],
+/*						'bulletPoint'=> [
+							'type'=> 'PlainText',
+							'text'=> ''
+						]*/
+					],
+					'logoUrl'=> '',
+					'hintText'=> $this->display->hint
+				]
+			]
+		];
+
+		if ($post->context->System->device->supportedInterfaces->Display && $this->display) $responseArray['response']['directives']=[
+			[
+				'type'=> "Display.RenderTemplate",
+				'template'=> [
+					'type'=> $this->display->displaytemplate,
+					'token'=> $this->display->token,
+					'title'=> $this->display->title,
+					'backgroundImage'=> [
+						'contentDescription'=>'Textured grey background',
+						'sources'=> [[
+							'url'=>$this->display->bgimage
+						]]
+					],
+					'image'=> [
+						'contentDescription'=>'icon',
+						'sources'=>[[
+							'url'=> $this->display->image
+						]]
+					],
+					'listItems'=> $this->display->items,
+					'textContent'=>['primaryText'=>['type'=>'RichText', 'text'=> $this->display->text]]
+/*									'secondaryText'=>['text'=>"aber immerhin",'type'=>'PlainText'],
+									'tertiaryText'=>['text'=>"aber immerhin",'type'=>'PlainText'],*/
+					]
+			],[
+				'type'=>'Hint',
+				'hint'=> ['type'=> 'PlainText', 'text'=> $this->display->hint]
+			]
+		];
+
+
+
 		if ($this->sessionAttributes) $responseArray['sessionAttributes']=$this->sessionAttributes;
 		
 		if ($debugger){ // dev-mode mysqli_connect-object for logging in- and output
 			global $post;
-			$debugger->query("INSERT INTO json_log VALUES ('',CURRENT_TIMESTAMP,'".serialize($post)."','".serialize($responseArray)."')");
+//			$debugger->query("INSERT INTO json_log VALUES ('',CURRENT_TIMESTAMP,'".serialize($post)."','".serialize($responseArray)."')");
+			$debugger->query("INSERT INTO json_log VALUES ('',CURRENT_TIMESTAMP,'".json_encode($post)."','".json_encode($responseArray)."')");
 		}
 
 		header('Content-Type: application/json; Content-Length:'.strlen(json_encode($responseArray)).'; Authorisation: Bearer '.$AccessToken);
 		echo json_encode($responseArray);
-	}
-}
-
-function debug($str, $where="json"){
-// might come in handy once in a while
-	global $OUTPUT;
-	if ($where=="card") {
-		$OUTPUT->card->title='skill debugging';
-		$OUTPUT->card->text=$str;
-	}
-	else {
-		$OUTPUT->sessionAttributes['DebugInfo']=$str;
 	}
 }
 
