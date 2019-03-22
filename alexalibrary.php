@@ -58,33 +58,83 @@ class BasicFunctions{
 	function interject($interjection){ return'<say-as interpret-as="interjection">'.$interjection.'</say-as>';}
 	function phoneme($text, $phonetic){ return'<phoneme alphabet="ipa" ph="'.$phonetic.'">'.$text.'</phoneme>';}
 
-	// final processed output
+}
+
+class OutputFunctions{
+	// create final processed output
+
+	function debug($str, $where="json"){
+		// might come in handy once in a while, shows debugging info in developer console
+			$this->sessionAttributes['DebugInfo']=$str;
+	}
+		
 	function answer(){
-		global $reprompt;
-		global $card;
-		global $output;
-		global $sessionAttributes;
 		global $AccessToken;
-		global $display;
 		global $debugger;
 		global $post;
-		
+
 		$responseArray = [
 			'version' => '1.0',
 			'response' => [
-				'outputSpeech' => ['type' => 'SSML', 'ssml' => '<speak>'.$output.'</speak>'],
-				'shouldEndSession' => $reprompt?false:true //default setting because the certification staff nags all the time
+				'outputSpeech' => ['type' => 'SSML', 'ssml' => '<speak>'.$this->speak.'</speak>'],
+				'shouldEndSession' => $this->reprompt?false:true //default setting because the certification staff nags all the time
 			]
 		];
 		// tidy addition of properties in case they exist
-		if ($card) $responseArray['response']['card']=$card;
-		if ($reprompt) $responseArray['response']['reprompt']=['outputSpeech'=>['type'=>'SSML', 'ssml'=>'<speak>'.$reprompt.'</speak>']];
+		if ($this->reprompt) $responseArray['response']['reprompt']=[
+			'outputSpeech'=>[
+				'type'=>'SSML',
+				'ssml'=>'<speak>'.$this->reprompt.'</speak>'
+			]
+		];
 
-		if ($post->context->System->device->supportedInterfaces->Display && $display) $responseArray['response']['directives']=$display;
-		if ($sessionAttributes) $responseArray['sessionAttributes']=$sessionAttributes;
+		if ($this->card) $responseArray['response']['card']=[
+			'type'=>'Standard',
+			'title'=>$this->card->title,
+			'image'=> [
+				'smallImageUrl'=> $this->card->image,
+				'largeImageUrl'=> $this->card->image
+			],
+			'text'=>$this->card->text
+		];
+
+		if ($this->permission) $responseArray['response']['card']=$this->permission;
+
+		if ($post->context->System->device->supportedInterfaces->Display && $this->display) $responseArray['response']['directives']=[
+			[
+				'type'=> "Display.RenderTemplate",
+				'template'=> [
+					'type'=> $this->display->displaytemplate,
+					'token'=> $this->display->token,
+					'title'=> $this->display->title,
+					/*'backgroundImage'=> [  //works, but font-color ist not supported so it is of high risk to use light backgrounds
+						'contentDescription'=>'Textured grey background',
+						'sources'=> [[
+						'url'=>$this->display->bgimage
+						]]
+					],*/
+					'image'=> [
+						'contentDescription'=>'icon',
+						'sources'=>[[
+							'url'=> $this->display->image
+						]]
+					],
+					'listItems'=> $this->display->items,
+					'textContent'=>['primaryText'=>['type'=>'RichText', 'text'=> $this->display->text]]
+/*									'secondaryText'=>['text'=>"aber immerhin",'type'=>'PlainText'],
+									'tertiaryText'=>['text'=>"aber immerhin",'type'=>'PlainText'],*/
+					]
+			],[
+				'type'=>'Hint',
+				'hint'=> ['type'=> 'PlainText', 'text'=> $this->display->hint]
+			]
+		];
+
+		if ($this->sessionAttributes) $responseArray['sessionAttributes']=$this->sessionAttributes;
+		
 		if ($debugger){ // dev-mode mysqli_connect-object for logging in- and output
 			global $post;
-			$debugger->query("INSERT INTO json_log VALUES ('',CURRENT_TIMESTAMP,'".serialize($post)."','".serialize($responseArray)."')");
+			$debugger->query("INSERT INTO json_log VALUES ('',CURRENT_TIMESTAMP,'".json_encode($post)."','".json_encode($responseArray)."')");
 		}
 
 		header('Content-Type: application/json; Content-Length:'.strlen(json_encode($responseArray)).'; Authorisation: Bearer '.$AccessToken);
@@ -92,20 +142,10 @@ class BasicFunctions{
 	}
 }
 
-function debug($str, $where="json"){
-// might come in handy once in a while
-		if ($where=="card") {
-			global $card;
-			$card=['type'=>'Simple', 'title'=>'skill debugging', 'content'=>$str ];
-		}
-		else {
-			global $sessionAttributes;
-			$sessionAttributes['DebugInfo']=$str;
-		}
-	}
-	
 $ALEXA = new BasicFunctions(); //initialize basic functions - you don´t say!
-$output = "was kann ich für dich tun?"; // in case i forgot to initialize the variable
+$OUTPUT = new OutputFunctions(); //initialize output functions - you don´t say!
+
+$OUTPUT->speak = "was kann ich für dich tun?"; // in case i forgot to initialize the variable
 
 //given parameters simplyfied (usual suspects)
 $AccessToken = $post->context->System->apiAccessToken;
