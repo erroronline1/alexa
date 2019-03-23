@@ -1,0 +1,95 @@
+// english language model
+// i know comments are forbidden in json-files...
+
+{
+    "interactionModel": {
+        "languageModel": {
+            "invocationName": "experts of the world",
+            "intents": [
+                {
+                    "name": "AMAZON.FallbackIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.HelpIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.StopIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.NavigateHomeIntent",
+                    "samples": []
+                },
+                {
+                    "name": "question_experts",
+                    "slots": [],
+                    "samples": [
+                        "this is correct",
+                        "if i am correct",
+                        "if my opinion is right",
+                        "if this is true",
+                        "if it is true",
+                        "if it is like that",
+                        "if i am right",
+                        "to confirm me",
+                        "to look it up"
+                    ]
+                }
+            ],
+            "types": []
+        }
+    }
+}
+
+// german language model
+
+{
+    "interactionModel": {
+        "languageModel": {
+            "invocationName": "experten der welt",
+            "intents": [
+                {
+                    "name": "AMAZON.FallbackIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.HelpIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.StopIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.NavigateHomeIntent",
+                    "samples": []
+                },
+                {
+                    "name": "question_experts",
+                    "slots": [],
+                    "samples": [
+                        "dass es stimmt",
+                        "dass ich recht habe",
+                        "ob meine aussage korrekt ist",
+                        "ob dem so ist",
+                        "ob es stimmt",
+                        "ob es so ist",
+                        "ob ich recht habe",
+                        "dass sie mir zustimmen sollen"
+                    ]
+                }
+            ],
+            "types": []
+        }
+    }
+}
