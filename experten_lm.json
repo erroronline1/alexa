@@ -78,14 +78,14 @@
                     "name": "question_experts",
                     "slots": [],
                     "samples": [
-                        "dass es stimmt",
-                        "dass ich recht habe",
-                        "ob meine aussage korrekt ist",
-                        "ob dem so ist",
-                        "ob es stimmt",
-                        "ob es so ist",
-                        "ob ich recht habe",
-                        "dass sie mir zustimmen sollen"
+                        "ich recht habe",
+                        "meine aussage korrekt ist",
+                        "dem so ist",
+                        "es stimmt",
+                        "es so ist",
+                        "ich recht habe",
+                        "es stimmt was ich sage",
+                        "sie mir zustimmen können"
                     ]
                 }
             ],
