@@ -18,6 +18,7 @@ it contains session variables and email-permission handling.
 [live skill](https://www.amazon.de/dp/B07LGDL4BV)
 
 ## experten
-this skill is inspired by [experten im internet](https://www.amazon.de/Marvin-Menzerath-Experten-im-Internet/dp/B01N5PB05L) by marvin menzerath.
+this skill is inspired by [experten im internet](https://www.amazon.de/dp/B01N5PB05L) by marvin menzerath.
 since i thought the answers could fit better to the invocation i did it myself. it is just a nonsense skill.
 but i messed around with multi-language support for german and english.
+[live skill](https://www.amazon.de/dp/B07Q1C8Z61)
