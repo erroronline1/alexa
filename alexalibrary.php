@@ -16,14 +16,14 @@ class BasicFunctions{
 				preg_match("/https:\/\/s3.amazonaws.com(?:\:443){0,1}\/echo.api\/(?:..\/){0,1}echo-api-cert(?:.*?).pem/", $head['Signaturecertchainurl'])
 			) &&
 			( //verify Signature
-				$signature['validFrom_time_t']<time() && time <$signature['validTo_time_t'] && stristr($signature['subject']['CN'],'echo-api.amazon.com') && substr(bin2hex($decryptedSignature), 30) === sha1($rawpost)
+				$signature['validFrom_time_t']<time() && time()<$signature['validTo_time_t'] && stristr($signature['subject']['CN'],'echo-api.amazon.com') && substr(bin2hex($decryptedSignature), 30) === sha1($rawpost)
 			) &&
 			( // verify timestamp of request
 				strtotime($post->request->timestamp)>=time()-150
 			) &&   
 			( // verify application id - can be string or array (for example submission id and developer id)
-				in_array($post->session->application->applicationId,$applicationId)
-				|| $post->session->application->applicationId == $applicationId
+				$post->session->application->applicationId == $applicationId
+				|| in_array($post->session->application->applicationId,$applicationId)			
 			)
 		);
 	} 
