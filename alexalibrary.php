@@ -58,6 +58,26 @@ class BasicFunctions{
 	function interject($interjection){ return'<say-as interpret-as="interjection">'.$interjection.'</say-as>';}
 	function phoneme($text, $phonetic){ return'<phoneme alphabet="ipa" ph="'.$phonetic.'">'.$text.'</phoneme>';}
 
+	// returns ISO-8601 duration format (PnYnMnDTnHnMnS) resolved for speech and in seconds
+	function resolveDuration($duration, $lang){
+		$t=[
+			[],
+			['de'=>['Jahr','Jahre'],'en'=>['year','years'],'sec'=>3600*24*365],
+			['de'=>['Monat','Monate'],'en'=>['month','months'],'sec'=>3600*24*30],
+			['de'=>['Tag','Tage'],'en'=>['day','days'],'sec'=>3600*24],
+			['de'=>['Stunde','Stunden'],'en'=>['hour','hours'],'sec'=>3600],
+			['de'=>['Minute','Minuten'],'en'=>['minute','minutes'],'sec'=>60],
+			['de'=>['Sekunde','Sekunden'],'en'=>['second','seconds'],'sec'=>1],
+		];
+		preg_match_all('/P(?>(\d+)Y)?(?>(\d+)M)?(?>(\d+)D)?T(?>(\d+)H)?(?>(\d+)M)?(?>(\d+)S)?/is',$duration,$matches);
+		foreach ($matches as $index => $value){
+			if ($index==0) continue;
+			$out['speech'].=$value[0]?$value[0].' '.$t[$index][$lang][$value[0]>1?1:0].' ':'';
+			//returns just an approximation given months and years!!!
+			$out['seconds']+=$value[0]*$t[$index]['sec'];
+		}
+		return $out;
+	}
 }
 
 class OutputFunctions{
