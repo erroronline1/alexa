@@ -102,11 +102,11 @@ elseif ($post->request->type == "IntentRequest"){
 
 			}
 			if ($list->num_rows > 1) {
-				$OUTPUT->speak .= '. möchtest du eines der rezepte in deiner alexa-app angezeigt bekommen, sage die nummer.';
+				$OUTPUT->speak .= '. möchtest du eines der rezepte angezeigt bekommen, sage die nummer.';
 				$OUTPUT->reprompt = 'möchtest du eines der rezepte 1 bis '.$items.' angezeigt bekommen?';
 			}
 			else {
-				$OUTPUT->speak .= '. möchtest du das rezept auch in deiner alexa-app angezeigt bekommen?';
+				$OUTPUT->speak .= '. möchtest du das rezept angezeigt bekommen?';
 				$OUTPUT->reprompt = 'möchtest du das rezept in deiner alexa-app angezeigt bekommen?';
 			}
 
@@ -146,11 +146,11 @@ elseif ($post->request->type == "IntentRequest"){
 	
 					}
 				if ($list->num_rows > 1) {
-					$OUTPUT->speak .= '. möchtest du eines der rezepte in deiner alexa-app angezeigt bekommen, sage die nummer.';
+					$OUTPUT->speak .= '. möchtest du eines der rezepte angezeigt bekommen, sage die nummer.';
 					$OUTPUT->reprompt = 'möchtest du eines der rezepte 1 bis ' . $items . ' angezeigt bekommen?';
 				}
 				else {
-					$OUTPUT->speak .= '. möchtest du das rezept auch in deiner alexa-app angezeigt bekommen?';
+					$OUTPUT->speak .= '. möchtest du das rezept angezeigt bekommen?';
 					$OUTPUT->reprompt = 'möchtest du das rezept in deiner alexa-app angezeigt bekommen?';
 				}
 
@@ -183,7 +183,7 @@ elseif ($post->request->type == "IntentRequest"){
 				$OUTPUT->card->title = $OUTPUT->display->title = 'Rezept für ' . $article['title'];
 				$OUTPUT->card->image = $OUTPUT->display->image = $article['image'];
 				$OUTPUT->card->text = $OUTPUT->display->text = $article['text'];
-				$OUTPUT->display->hint = 'sag nichts um das Rezept hier weiter angezeigt zu bekommen.';
+				$OUTPUT->display->hint = 'sag "ja" um den Link per eMail zu bekommen.';
 				$OUTPUT->sessionAttributes = ['SelectableReceipts' => $which[$receiptnumber-1], 'YesIntentConfirms' => 'sendreceipt'];
 
 			}
@@ -205,8 +205,12 @@ elseif ($post->request->type == "IntentRequest"){
 			$OUTPUT->card->title = $OUTPUT->display->title = 'Rezept für ' . $article['title'];
 			$OUTPUT->card->image = $OUTPUT->display->image = $article['image'];
 			$OUTPUT->card->text = $OUTPUT->display->text = $article['text'];
+			$receiptfound=true;
 		}
-		else $OUTPUT->speak = 'ich weiß nicht welches rezept ich dir zusenden soll. frag mich nochmal!';
+		else {
+			$OUTPUT->speak = 'ich weiß nicht welches rezept ich dir zusenden soll. frag mich nochmal!';
+			$receiptfound=false;
+		}
 
 		$usermail = $ALEXA->getemail($AccessToken);
 		if (!is_string($usermail) || $usermail == 'null') {
@@ -216,11 +220,12 @@ elseif ($post->request->type == "IntentRequest"){
 			$OUTPUT->sessionAttributes = ['UnusedConfirmation' => true];
 		}
 		else {
-			if (!$OUTPUT->speak){
-				$raw = 'Das Rezept f&uuml;r <strong>' . utf8_decode($entry['titel']) . '</strong> findest du unter dem Link<br /><a href="http://annebackt.de/?permalink=' . base_convert($article['timestamp'], 10, 16) . '">http://annebackt.de/?permalink=' . base_convert($article['timestamp'], 10, 16) . '</a><br />'
+			if ($receiptfound){
+				$raw = 'Das Rezept f&uuml;r <strong>' . $article['title'] . '</strong> findest du unter dem Link<br /><a href="http://annebackt.de/?permalink=' . base_convert($article['timestamp'], 10, 16) . '">http://annebackt.de/?permalink=' . base_convert($article['timestamp'], 10, 16) . '</a><br />'
 				.'<br /><small>Du hast im Alexa-Skill die Freigabe zur Nutzung Deiner eMail-Adresse und zur Zusendung des Links erteilt.</small>';
-				if (send_email('asb@annebackt.de', 'Anne backt via Alexa Skill', $usermail, 'Rezept für '.$article['titel'], '', $raw, False,'annebackt.de')) $OUTPUT->speak = 'die email wurde versandt. kann ich sonst noch etwas für dich tun?';
+				if (send_email('asb@annebackt.de', 'Anne backt via Alexa Skill', $usermail, 'Rezept für '.$article['title'], '', $raw, False,'annebackt.de')) $OUTPUT->speak = 'die email wurde versandt. kann ich sonst noch etwas für dich tun?';
 				else $OUTPUT->speak = 'die mail konnte leider nicht versendet werden. versuche es später oder sag mir über annebackt.de bescheid. möchtest du andere rezepte zumindest angezeigt bekommen?';
+				$OUTPUT->display->hint = 'du hast eine eMail an <strong>' . $usermail . '</strong> erhalten.';
 			}
 			$OUTPUT->sessionAttributes = ['UnusedConfirmation' => true];
 			$OUTPUT->reprompt = 'möchtest du noch andere rezepte angezeigt oder zugeschickt bekommen?';
@@ -285,6 +290,12 @@ elseif ($post->request->type == "IntentRequest"){
 			$OUTPUT->reprompt = 'was kann ich für dich tun?';
 			$OUTPUT->sessionAttributes = ['previousCancel' => true];
 		}
+	}
+	elseif ($IntentName == "DEVELOPER"){
+		$OUTPUT->speak = 'das hier ist der entwicklerbereich der zeitweise informationen bereitstellt.';
+		$OUTPUT->reprompt = 'kann ich etws anderes für dich tun?';
+
+		$OUTPUT->card->text = $OUTPUT->display->text = "hier gibt es gerade nichts zu sehen.";
 	}
 }
 
