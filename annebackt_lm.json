@@ -18,6 +18,18 @@
                 "samples": []
             },
             {
+                "name": "NO_INTENT",
+                "slots": [],
+                "samples": [
+                    "nein",
+                    "hör auf",
+                    "es reicht",
+                    "genug",
+                    "halt",
+                    "nein danke"
+                ]
+            },
+            {
                 "name": "NEW_RECEIPTS",
                 "slots": [
                     {
@@ -200,14 +212,7 @@
             {
                 "name": "AMAZON.CancelIntent",
                 "slots": [],
-                "samples": [
-                    "nein",
-                    "hör auf",
-                    "es reicht",
-                    "genug",
-                    "halt",
-                    "nein danke"
-                ]
+                "samples": []
             },
             {
                 "name": "AMAZON.HelpIntent",
