@@ -245,7 +245,7 @@ elseif ($post->request->type == "IntentRequest"){
 		$OUTPUT->speak = 'dies ist ein skill der seite annebackt.de. stelle fragen wie: was sind die neuesten rezepte oder gibt es rezepte mit hefewasser - wobei hefewasser hier eine beliebige zutat ist. mehr optionen werden dir in der alexa-app angezeigt. versuchs mal!';
         $OUTPUT->card->title = 'Was kann der Annebackt.de-Skill?';
         $OUTPUT->card->image = "https://erroronline.one/column4/sslmedia.php?../../asb/design/icon192x192.png";
-		$OUTPUT->card->text = str_replace("<br />", "\r\n", $stardardText)
+		$OUTPUT->card->text = str_replace(["<br />", "<em>", "</em>"], ["\r\n", "", ""], $stardardText)
 			."Du kannst dir die Rezepte in der App anzeigen und per eMail zusenden lassen. "
 			."Wenn es mehr als ein Rezept auf deine Frage hin gibt sage\r\n"
 			."\"Zeige mir Rezept Nummer (z.B.) zwei.\" oder \r\n"
