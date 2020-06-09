@@ -42,7 +42,7 @@ class BasicFunctions{
 	}
 	function getemail($token){
 		// Create a stream
-		$opts = [ 'http' => [ 'method' => 'GET', 'header' => 'Accept: application/json\r\nAuthorization: Bearer ' . $token . '\r\n'] ];
+		$opts = [ 'http' => [ 'method' => 'GET', 'header' => "Accept: application/json\r\nAuthorization: Bearer " . $token . "\r\n"] ];
 		$context = stream_context_create($opts);
 		// Open the file using the HTTP headers set above
 		///////////// CAUTION! INSANITY AHEAD: ENDPOINT api.eu.amazonalexa.com WITH .eu ///////////////////////////
