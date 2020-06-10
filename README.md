@@ -2,8 +2,8 @@
 amazon alexa skills. more or less useful
 
 i do them in php for the easiest implementation on my webspace.
-i have only one ssl certificate, therefore the unusual hostname and media-file-workarounds within the skills endpoints.
-playing with alexa once in a while i built a small libray (that might evolve in the future) to be able to concentrate on the specific tasks of the skill
+i had only one ssl certificate, therefore the unusual hostname in former versions and the media-file-workaround within the skills endpoints. i could resolve the latter, but it may as well serve as an example.
+playing with alexa once in a while i built a small framework (that might evolve in the future) to be able to concentrate on the specific tasks of the skill.
 feel free to share your opinion and improvements.
 the skills are mostly in german language. not the sourcecode and variable names so i hope it to be still understandable.
 
@@ -13,7 +13,7 @@ it contains session-variables, storing and fetching database information on the 
 [live skill](https://www.amazon.de/dp/B07B6NVYQP/)
 
 ## annebackt
-my second skill is capable of asking for recent entries of the baking-blog of my wife. one can display the receipts within the alexa-app and send a link via email.
+my second skill is capable of asking for recent entries of the baking-blog of my wife. one can display the receipts within the alexa-app and send a link via email. update 6/20: displays on echo show.
 it contains session variables and email-permission handling.
 [live skill](https://www.amazon.de/dp/B07LGDL4BV)
 
