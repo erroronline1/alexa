@@ -294,15 +294,58 @@ elseif ($post->request->type == "IntentRequest"){
 	elseif ($IntentName == "DEVELOPER"){
 		$OUTPUT->speak = 'das hier ist der entwicklerbereich der zeitweise informationen bereitstellt.';
 		$OUTPUT->reprompt = 'kann ich etws anderes für dich tun?';
-
-		$OUTPUT->card->text = $OUTPUT->display->text = "hier gibt es gerade nichts zu sehen.";
+        $OUTPUT->card->image = $OUTPUT->display->image = "https://erroronline.one/column4/sslmedia.php?../../asb/design/icon192x192.png";
+		$OUTPUT->card->text = $OUTPUT->display->text = "gerade nichts los hier.";
 	}
 }
 
 //	$OUTPUT->display->token='Anne backt';
 //	$OUTPUT->display->title='Anne backt';
 	$OUTPUT->display->bgimage = 'https://erroronline.one/column4/sslmedia.php?../../asb/design/bg.jpg';//.getImage('','');
-	$OUTPUT->display->skillogo = 'https://erroronline.one/column4/sslmedia.php?../../asb/design/icon192x192.png';
+	$OUTPUT->display->skillogo = 'https://erroronline.one/column4/sslmedia.php?../../asb/design/icon192x192w.png';
+    $OUTPUT->display->styles = [
+        'textStylePrimary' => [
+            'values' => [
+                'color' => '#000000',
+                'fontSize' => 25,
+                'fontWeight' => 100
+            ]
+        ],
+        'textStyleSecondary' => [
+            'values' => [
+                'color' => '#000000',
+                'fontSize' => 22,
+                'fontWeight' => 100
+            ]
+        ],
+        'customHeader' => [
+            'values' =>[
+                'color' => '#000000',
+                'fontSize' => 27,
+                'backgroundColor' => '#EBB1D7',
+                'textAlignVertical' => 'center'
+                ]
+        ],
+        'customHint' => [
+            'values' =>[
+                'color' => '#000000aa',
+                'fontFamily' => 'Bookerly',
+                'fontStyle' => 'italic',
+                'fontSize' => 22,
+                'textAlignVertical' => 'bottom'
+            ]
+        ]
+    ];
+    $OUTPUT->display->resources = [
+        [
+            'dimensions' => [
+                'headerHeight' => '15vh',
+                'bodyHeight' => '70vh',
+                'bodyPaddingTopBottom' => 16,
+                'bodyPaddingLeftRight' => 32
+        ]
+        ]
+    ];
 
 
 $OUTPUT->answer();
