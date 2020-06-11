@@ -93,11 +93,18 @@ class OutputFunctions{
 		global $debugger;
 		global $post;
 
-		$responseArray = [
+/*
+                          _
+ ___  ___  ___  ___  ___ | |_
+|_ -|| . || -_|| -_||  _||   |
+|___||  _||___||___||___||_|_|
+     |_|
+
+*/		$responseArray = [
 			'version' => '1.0',
 			'response' => [
 				'outputSpeech' => ['type' => 'SSML', 'ssml' => '<speak>' . $this->speak . '</speak>'],
-				'shouldEndSession' => $this->reprompt ? false : true //default setting because the certification staff nags all the time
+				'shouldEndSession' => $this->reprompt ? false : true // default setting because the certification staff nags all the time
 			]
 		];
 		// tidy addition of properties in case they exist
@@ -109,7 +116,13 @@ class OutputFunctions{
 				]
 			];
 
-		if ($this->card) $responseArray['response']['card'] = 
+/*
+                  _
+ ___  ___  ___  _| |
+|  _|| .'||  _|| . |
+|___||__,||_|  |___|
+
+*/		if ($this->card) $responseArray['response']['card'] = 
 			[
 				'type' => 'Standard',
 				'title' =>$this->card->title,
@@ -122,7 +135,14 @@ class OutputFunctions{
 
 		if ($this->permission) $responseArray['response']['card']=$this->permission;
 
-		//support for non APL enabled deviced
+/*
+                               _                                   _
+ ___  ___  ___  ___  ___  ___ | |    ___  ___  ___  ___  ___  ___ | |
+|   || . ||   ||___|| .'|| . || |   | . || -_||   || -_||  _|| .'|| |
+|_|_||___||_|_|     |__,||  _||_|   |_  ||___||_|_||___||_|  |__,||_|
+                         |_|        |___|
+
+*/		// support for non APL enabled deviced
 		if ($post->context->System->device->supportedInterfaces->Display && !$post->context->System->device->supportedInterfaces->Alexa.Presentation.APL && $this->display) $responseArray['response']['directives']=[
 			[
 				'type' => "Display.RenderTemplate",
@@ -144,8 +164,8 @@ class OutputFunctions{
 					],
 					'listItems' => $this->display->items,
 					'textContent' => ['primaryText' => ['type' => 'RichText', 'text' => $this->display->text]]
-/*									'secondaryText' => ['text' =>"aber immerhin",'type' => 'PlainText'],
-									'tertiaryText' => ['text' =>"aber immerhin",'type' => 'PlainText'],*/
+								/*	'secondaryText' => ['text' =>"whatever",'type' => 'PlainText'],
+									'tertiaryText' => ['text' =>"whatever",'type' => 'PlainText'],*/
 					]
 			],[
 				'type' => 'Hint',
@@ -153,86 +173,77 @@ class OutputFunctions{
 			]
 		];
 
-		//support for APL enabled deviced
+/*
+           _                                   _
+ ___  ___ | |    ___  ___  ___  ___  ___  ___ | |
+| .'|| . || |   | . || -_||   || -_||  _|| .'|| |
+|__,||  _||_|   |_  ||___||_|_||___||_|  |__,||_|
+     |_|        |___|
+
+*/		//support for APL enabled devices
 		if ($post->context->System->device->supportedInterfaces->Display && $post->context->System->device->supportedInterfaces->Alexa.Presentation.APL && $this->display) {
-			$responseArray['response']['directives']=[
+			
+			$styles = $this->display->styles != null ? $this->display->styles : [
+				'textStylePrimary' => [
+					'values' => [
+						'color' => '#000000',
+						'fontSize' => 25,
+						'fontWeight' => 100
+					]
+				],
+				'textStyleSecondary' => [
+					'values' => [
+						'color' => '#000000',
+						'fontSize' => 22,
+						'fontWeight' => 100
+					]
+				],
+				'customHeader' => [
+					'values' =>[
+						'color' => '#000000',
+						'fontSize' => 27,
+						'backgroundColor' => '',
+						'textAlignVertical' => 'center'
+						]
+				],
+				'customHint' => [
+					'values' =>[
+						'color' => '#000000',
+						'fontFamily' => 'Bookerly',
+						'fontStyle' => 'italic',
+						'fontSize' => 22,
+						'textAlignVertical' => 'bottom'
+					]
+				]
+			];
+			$resources = $this->display->resources != null ? $this->display->resources : [
+				[
+					'dimensions' => [
+						'headerHeight' => '10vh',
+						'bodyHeight' => '80vh',
+						'bodyPaddingTopBottom' => 16,
+						'bodyPaddingLeftRight' => 32
+					]
+				]
+			];
+			
+			
+			$responseArray['response']['directives'] = [
 				[
 					'type' => "Alexa.Presentation.APL.RenderDocument",
 					'token' => $this->display->token,
 					'document' => [
 						'type' => 'APL',
 						'version' => '1.3',
-						'theme' => 'light',
+						'theme' => 'dark',
 						'import' => [
 							[
 								'name' => 'alexa-layouts',
 								'version' => '1.0.0'
 							]
 						],
-						'styles' => [
-							'textStyleBase' => [
-								'description' => 'Base font description; set color',
-								'values' => [
-									[
-										'color' => '#000000'
-									]
-								]
-							],
-							'textStyleBase0' => [
-								'description' => 'Thin version of basic font',
-								'extend' => 'textStyleBase',
-								'values' => [
-									'fontWeight' => '100'
-								]
-							],
-							'textStyleBase1' => [
-								'description' => 'Light version of basic font',
-								'extend' => 'textStyleBase',
-								'values' => [
-									'fontWeight' => '300'
-								]
-							],
-							'mixinBody' => [
-								'values' => [
-									'fontSize' => 27
-								]
-							],
-							'mixinPrimary' => [
-								'values' => [
-									'fontSize' => 27
-								]
-							],
-							'mixinSecondary' => [
-								'values' => [
-									'fontSize' => 23
-								]
-							],
-							'textStylePrimary' => [
-								'extend' => [
-									'textStyleBase1',
-									'mixinPrimary'
-								]
-							],
-							'textStyleSecondary' => [
-								'extend' => [
-									'textStyleBase0',
-									'mixinSecondary'
-								]
-							],
-							'textStyleBody' => [
-								'extend' => [
-									'textStyleBase1',
-									'mixinBody'
-								]
-							],
-							'textStyleSecondaryHint' => [
-								'values' => [
-									'fontFamily' => 'Bookerly',
-									'fontStyle' => 'italic',
-									'fontSize' => 22
-								]
-							],
-						],
+						'styles' => $styles,
+						'resources' => $resources,
 						'onMount' => [],
 						'graphics' => [],
 						'commands' => [],
@@ -255,7 +266,13 @@ class OutputFunctions{
 				]
 			];
 
-			if ($this->display->bgimage){
+/*
+ _              _                               _       _
+| |_  ___  ___ | |_  ___  ___  ___  _ _  ___  _| | ___ |_| _____  ___  ___  ___ 
+| . || .'||  _|| '_|| . ||  _|| . || | ||   || . ||___|| ||     || .'|| . || -_|
+|___||__,||___||_,_||_  ||_|  |___||___||_|_||___|     |_||_|_|_||__,||_  ||___|
+                    |___|                                             |___|
+*/			if ($this->display->bgimage){
 				array_push($responseArray['response']['directives'][0]['document']['mainTemplate']['items'][0]['items'],
 					[
 						'type' => 'Image',
@@ -266,28 +283,102 @@ class OutputFunctions{
 						'source' => $this->display->bgimage,
 					]);
 			}
-			if ($this->display->title || $this->display->skillogo){
+
+/*
+                _                   _                _
+ ___  _ _  ___ | |_  ___  _____    | |_  ___  ___  _| | ___  ___
+|  _|| | ||_ -||  _|| . ||     |   |   || -_|| .'|| . || -_||  _|
+|___||___||___||_|  |___||_|_|_|   |_|_||___||__,||___||___||_|
+
+*/			if ($this->display->title || $this->display->skillogo){
 				array_push($responseArray['response']['directives'][0]['document']['mainTemplate']['items'][0]['items'],
 					[
-						'when' => '${viewport.shape != \'round\'}',
-						'type' => 'AlexaHeader',
-						'headerTitle' => $this->display->title,
-						'headerAttributionImage' => $this->display->skillogo,
-					]);
+					'type' => 'Frame',
+					'height' => '@headerHeight',
+					'width' => '100vw',
+					'style' => 'customHeader',
+					'items' => [
+						[
+							'type' => 'Container',
+							'height' => '@headerHeight',
+							'width' => '100vw',
+							'direction' => 'row',
+							'style' => 'customHeader',
+							'items' => [
+									[
+										'when' => '${viewport.shape != \'round\'}',
+										'type' => 'Text',
+										'text' => $this->display->title,
+										'style' => 'customHeader',
+										'maxLines' => 1,
+										'height' => '100%',
+										'width' => '95vw',
+										'paddingLeft' => 16
+									],
+									[
+										'when' => '${viewport.shape != \'round\'}',
+										'type' => 'Image',
+										'height' => '100%',
+										'width' => '5vw',
+										'paddingRight' => 16,
+										'paddingTop'=> 8,
+										'scale' => 'best-fit',
+										'align' => 'center',
+										'source' => $this->display->skillogo
+									],
+									[
+										'when' => '${viewport.shape == \'round\'}',
+										'type' => 'Image',
+										'height' => '100%',
+										'width' => '100vw',
+										'paddingTop'=> 4,
+										'scale' => 'best-fit',
+										'align' => 'center',
+										'source' => $this->display->skillogo
+									]
+								]
+							]]
+						]);
 			}
 
+/*			
+                _                   _    _       _
+ ___  _ _  ___ | |_  ___  _____    | |_ |_| ___ | |_
+|  _|| | ||_ -||  _|| . ||     |   |   || ||   ||  _|
+|___||___||___||_|  |___||_|_|_|   |_|_||_||_|_||_|
 
-			if ($this->display->text){
+*/			// placed before content to have it positioned below a possible touch layer
+			if ($this->display->hint){
+				array_push($responseArray['response']['directives'][0]['document']['mainTemplate']['items'][0]['items'],
+				[
+					'when' => '${viewport.shape != \'round\'}',
+					'height' => '100vh',
+					'width' => '100vw',
+					'position' => 'absolute',
+					'style' => 'customHint',
+					'paddingLeft' => 16,
+					'paddingBottom' => 16,
+					'type' => 'Text',
+					'text' => $this->display->hint,
+					'maxLines' => 1
+				]);
+			}
+
+/*
+ _              _              _  _    _       _
+| |_  ___  _ _ | |_     _ _ _ |_|| |_ | |_    |_| _____  ___  ___  ___
+|  _|| -_||_'_||  _|   | | | || ||  _||   |   | ||     || .'|| . || -_|
+|_|  |___||_,_||_|     |_____||_||_|  |_|_|   |_||_|_|_||__,||_  ||___|
+                                                             |___|
+*/			if ($this->display->text){
 				if ($this->display->image){
-					$image =	[
-							'when' => '${viewport.shape != \'round\'}',
+					$image = [
 							'type' => 'Image',
 							'source' => $this->display->image,
 							'scale' => 'best-fit',
 							'width' => '35vw',
-							'height' => '70vh',
+							'height' => '@bodyHeight',
 							'align' => 'center',
-							//'overlayColor' => 'rgba(0, 0, 0, 0.6)'
 						];
 				} else $image = false;
 	
@@ -296,20 +387,24 @@ class OutputFunctions{
 						'when' => '${viewport.shape != \'round\'}',
 						'type' => 'Container',
 						'direction' => 'row',
-						'paddingLeft' => 40,
-						'paddingRight' => 40,
+						'paddingLeft' => '@bodyPaddingLeftRight',
+						'paddingRight' => '@bodyPaddingLeftRight',
+						'paddingTop' => '@bodyPaddingTopBottom',
+						'paddingBottom' => '@bodyPaddingTopBottom',
+						'height' => '@bodyHeight',
+						'width' => '100vw',
 						'grow' => 1,
 						'items' => [
 							$image,
 							[
 								'type' => 'ScrollView',
 								'width' => ($image ? '60vw' : '100vw'),
-								'height' => '70vh',
+								'height' => '@bodyHeight',
 								'shrink' => 1,
 								'item' => [ 
 									[
 										'type' => 'Container',
-										'paddingLeft' => $image ? 40 : 0,
+										'paddingLeft' => $image ? '@bodyPaddingLeftRight' : 0,
 										'items' => [
 											[
 												'type' => 'Text',
@@ -322,30 +417,45 @@ class OutputFunctions{
 							]
 						]
 					]);
+
+					if ($image) { $image['width'] = '75vw';}
+					if ($this->display->title){
+						$title = [
+								'type' => 'Text',
+								'text' => $this->display->title,
+								'style' => 'customHeader',
+								'width' => '90vw',
+							];
+					} else $title = false;
+
 					array_push($responseArray['response']['directives'][0]['document']['mainTemplate']['items'][0]['items'],
 					[
 						'when' => '${viewport.shape == \'round\'}',
 						'type' => 'Container',
 						'direction' => 'column',
-						'paddingTop' => 65,
-						'paddingLeft' => 30,
-						'paddingRight' => 30,
+						'paddingTop' => '@bodyPaddingTopBottom',
+						'paddingLeft' => '@bodyPaddingLeftRight',
+						'paddingRight' => '@bodyPaddingLeftRight',
 						'grow' => 1,
 						'items' => [
 							[
 								'type' => 'ScrollView',
 								'width' => '90vw',
-								'height' => '70vh',
+								'height' => '85vh',
 								'shrink' => 1,
-								'item' => [ 
+								'item' => [
 									[
 										'type' => 'Container',
-										'paddingLeft' => 30,
+										'paddingLeft' => '@bodyPaddingLeftRight',
+										'paddingRight' => '@bodyPaddingLeftRight',
 										'items' => [
+											$title,
+											$image,
 											[
 												'type' => 'Text',
 												'text' => preg_replace('/\r\n/ms', '<br />', $this->display->text),
 												'style' => 'textStylePrimary',
+												'paddingBottom' => '20vh',
 											]
 										]
 									]
@@ -355,13 +465,18 @@ class OutputFunctions{
 					]);
 			}
 
-			//display a list
-			if ($this->display->items){
+/*
+ _  _       _
+| ||_| ___ | |_
+| || ||_ -||  _|
+|_||_||___||_|
+
+*/			if ($this->display->items){
 				array_push($responseArray['response']['directives'][0]['document']['mainTemplate']['items'][0]['items'],
 					[
 						'when' => '${viewport.shape != \'round\'}',
 						'type' => 'Container',
-						'height' => '70vh',
+						'height' => '@bodyHeight',
 						'width' => '100vw',
 						'items' => [
 							[
@@ -386,11 +501,10 @@ class OutputFunctions{
 									],
 									'item' => [
 										'type' => 'Container',
-										'maxWidth' => '30vw',
-										'minWidth' => '30vw',
+										'width' => '30vw',
 										'paddingLeft' => 0,
 										'paddingRight' => 20,
-										'height' => '100%',
+										'height' => '@bodyHeight',
 										'items' => [
 											[
 												'type' => 'Image',
@@ -418,22 +532,23 @@ class OutputFunctions{
 							]
 						]
 					]);
+
 					array_push($responseArray['response']['directives'][0]['document']['mainTemplate']['items'][0]['items'],
 					[
 						'when' => '${viewport.shape == \'round\'}',
 						'type' => 'Container',
-						'height' => '100vh',
-						'width' => '100vw',
+						'width' => '90vw',
 						'items' => [
 							[
 								'type' => 'Sequence',
 								'scrollDirection' => 'vertical',
-								'paddingTop' => 30,
-								'paddingLeft' => 60,
-								'paddingRight' => 60,
+								'paddingTop' => '@bodyPaddingTopBottom',
+								'paddingLeft' => '@bodyPaddingLeftRight',
+								'paddingRight' => '@bodyPaddingLeftRight',
+								'paddingBottom' => '20vh',
 								'data' => $this->display->items,
-								'height' => '100vh',
-								'width' => '100vw',
+								'height' => '85vh',
+								'width' => '90vw',
 								'numbered' => true,
 								'item' => [
 									'type' => 'TouchWrapper',
@@ -449,17 +564,18 @@ class OutputFunctions{
 									'item' => [
 										[
 											'type' => 'Container',
-											'maxWidth' => '100%',
-											'minWidth' => '100%',
-											'paddingLeft' => 0,
-											'paddingRight' => 0,
-											'height' => '100%',
+											'width' => '75vw',
+											'paddingTop' => '@bodyPaddingTopBottom',
+											'paddingLeft' => '@bodyPaddingLeftRight',
+											'paddingRight' => '@bodyPaddingLeftRight',
 											'items' => [
 												[
 													'type' => 'Image',
 													'source' => '${data.image.sources[0].url}',
-													'height' => '50vh',
-													'width' => '100%'
+													'width' => '75vw',
+													'height' => '65vh',
+													'scale' => 'best-fit',
+													'align' => 'center',
 												],
 												[
 													'type' => 'Text',
@@ -467,11 +583,6 @@ class OutputFunctions{
 													'style' => 'textStylePrimary',
 													'maxLines' => 1,
 													'spacing' => 12,
-													'style' => [
-														'values' => [
-															'fontSize' => 5
-														]
-													]
 												],
 												[
 													'type' => 'Text',
@@ -479,11 +590,6 @@ class OutputFunctions{
 													'style' => 'textStyleSecondary',
 													'maxLines' => 1,
 													'spacing' => 12,
-													'style' => [
-														'values' => [
-															'fontSize' => 5
-														]
-													]
 												],
 											]
 										]
@@ -493,17 +599,6 @@ class OutputFunctions{
 						]
 					]);
 			}
-
-			if ($this->display->hint){
-				array_push($responseArray['response']['directives'][0]['document']['mainTemplate']['items'][0]['items'],
-					[
-						'when' => '${viewport.shape != \'round\'}',
-						'type' => 'AlexaFooter',
-						'style' => 'textStyleSecondaryHint',
-						'hintText' => $this->display->hint
-					]);
-			}
-		
 		}
 
 		if ($this->sessionAttributes) $responseArray['sessionAttributes']=$this->sessionAttributes;
