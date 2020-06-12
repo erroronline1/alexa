@@ -125,12 +125,12 @@ class OutputFunctions{
 */		if ($this->card) $responseArray['response']['card'] = 
 			[
 				'type' => 'Standard',
-				'title' =>$this->card->title,
+				'title' => $this->card->title,
 				'image' => [
 					'smallImageUrl' => $this->card->image,
 					'largeImageUrl' => $this->card->image
 				],
-				'text' =>$this->card->text
+				'text' => $this->card->text . "\n\n" . $this->card->subtext
 			];
 
 		if ($this->permission) $responseArray['response']['card']=$this->permission;
@@ -163,9 +163,10 @@ class OutputFunctions{
 						]]
 					],
 					'listItems' => $this->display->items,
-					'textContent' => ['primaryText' => ['type' => 'RichText', 'text' => $this->display->text]]
-								/*	'secondaryText' => ['text' =>"whatever",'type' => 'PlainText'],
-									'tertiaryText' => ['text' =>"whatever",'type' => 'PlainText'],*/
+					'textContent' => [
+						'primaryText' => ['type' => 'RichText', 'text' => $this->display->text],
+						'secondaryText' => ['text' =>$this->display->subtext],'type' => 'PlainText'],
+						/*'tertiaryText' => ['text' =>"whatever",'type' => 'PlainText'],*/
 					]
 			],[
 				'type' => 'Hint',
@@ -194,7 +195,7 @@ class OutputFunctions{
 				'textStyleSecondary' => [
 					'values' => [
 						'color' => '#000000',
-						'fontSize' => 22,
+						'fontSize' => 20,
 						'fontWeight' => 100
 					]
 				],
@@ -371,6 +372,7 @@ class OutputFunctions{
 |_|  |___||_,_||_|     |_____||_||_|  |_|_|   |_||_|_|_||__,||_  ||___|
                                                              |___|
 */			if ($this->display->text){
+
 				if ($this->display->image){
 					$image = [
 							'type' => 'Image',
@@ -382,6 +384,14 @@ class OutputFunctions{
 						];
 				} else $image = false;
 	
+				if ($this->display->subtext){
+					$subtext= [
+						'type' => 'Text',
+						'text' => preg_replace('/\r\n/ms', '<br />', $this->display->subtext),
+						'style' => 'textStyleSecondary',
+					];
+				} else $subtext = false;
+
 				array_push($responseArray['response']['directives'][0]['document']['mainTemplate']['items'][0]['items'],
 					[
 						'when' => '${viewport.shape != \'round\'}',
@@ -410,7 +420,8 @@ class OutputFunctions{
 												'type' => 'Text',
 												'text' => preg_replace('/\r\n/ms', '<br />', $this->display->text),
 												'style' => 'textStylePrimary',
-											]
+											],
+											$subtext
 										]
 									]
 								]
