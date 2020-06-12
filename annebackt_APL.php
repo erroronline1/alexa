@@ -294,8 +294,16 @@ elseif ($post->request->type == "IntentRequest"){
 	elseif ($IntentName == "DEVELOPER"){
 		$OUTPUT->speak = 'das hier ist der entwicklerbereich der zeitweise informationen bereitstellt.';
 		$OUTPUT->reprompt = 'kann ich etws anderes für dich tun?';
-        $OUTPUT->card->image = $OUTPUT->display->image = "https://erroronline.one/column4/sslmedia.php?../../asb/design/icon192x192.png";
-		$OUTPUT->card->text = $OUTPUT->display->text = "gerade nichts los hier.";
+		$OUTPUT->card->title = $OUTPUT->display->title = "gerade nichts los hier";
+
+		$opts = [ 'http' => [ 'method' => 'GET', 'header' => "Accept: application/json\r\nAuthorization: " . $pexelsAPIKey . "\r\n"] ];
+		$context = stream_context_create($opts);
+		$catpic= json_decode(file_get_contents('https://api.pexels.com/v1/search?query=kitten&per_page=100', false, $context));
+		$randcat=$catpic->photos[random_int(0,count($catpic->photos)-1)];
+						
+		$OUTPUT->card->image = $OUTPUT->display->image = $randcat->src->medium; //"https://erroronline.one/column4/sslmedia.php?../../asb/design/icon192x192.png";
+		$OUTPUT->card->text = $OUTPUT->display->text = "Hier, ein Bild von einer Katze...";
+		$OUTPUT->card->subtext = $OUTPUT->display->subtext = "(von " . $randcat->photographer . ")";
 	}
 }
 
@@ -314,7 +322,7 @@ elseif ($post->request->type == "IntentRequest"){
         'textStyleSecondary' => [
             'values' => [
                 'color' => '#000000',
-                'fontSize' => 22,
+                'fontSize' => 20,
                 'fontWeight' => 100
             ]
         ],
