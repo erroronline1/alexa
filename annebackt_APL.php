@@ -292,9 +292,10 @@ elseif ($post->request->type == "IntentRequest"){
 		}
 	}
 	elseif ($IntentName == "DEVELOPER"){
-		$OUTPUT->speak = 'das hier ist der entwicklerbereich der zeitweise informationen bereitstellt.';
-		$OUTPUT->reprompt = 'kann ich etws anderes für dich tun?';
-		$OUTPUT->card->title = $OUTPUT->display->title = "gerade nichts los hier";
+		$OUTPUT->speak = 'das hier ist der entwicklerbereich der zeitweise informationen bereitstellt. hier ist aber gerade nichts los.';
+		$OUTPUT->reprompt = 'kann ich etwas anderes für dich tun?';
+		$OUTPUT->sessionAttributes = ['previousCancel' => true];
+		$OUTPUT->card->title = $OUTPUT->display->title = "Gerade nichts los im Entwicklerbereich";
 
 		$opts = [ 'http' => [ 'method' => 'GET', 'header' => "Accept: application/json\r\nAuthorization: " . $pexelsAPIKey . "\r\n"] ];
 		$context = stream_context_create($opts);
