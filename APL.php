@@ -6,7 +6,13 @@ $post = json_decode($post);
 class BasicFunctions{
 // i decided to implement this as an singelton because i consider the function-request more readable
 	
-	function verified($post, $rawpost, $applicationId){
+/*
+                _  ___  _            _    _
+ _ _  ___  ___ |_||  _||_| ___  ___ | |_ |_| ___  ___
+| | || -_||  _|| ||  _|| ||  _|| .'||  _|| || . ||   |
+ \_/ |___||_|  |_||_|  |_||___||__,||_|  |_||___||_|_|
+
+*/	function verified($post, $rawpost, $applicationId){
 	//verification as expected by amazon
 		$head=getallheaders();
 		$signature = openssl_x509_parse(file_get_contents($head['Signaturecertchainurl']));
@@ -33,7 +39,13 @@ class BasicFunctions{
 		header("HTTP/1.1 400 (Bad Request)");
 	}
 
-	// email handling
+/*
+                  _  _     _                _  _  _
+ ___  _____  ___ |_|| |   | |_  ___  ___  _| || ||_| ___  ___
+| -_||     || .'|| || |   |   || .'||   || . || || ||   || . |
+|___||_|_|_||__,||_||_|   |_|_||__,||_|_||___||_||_||_|_||_  |
+                                                         |___|
+*/	// email handling
 	function askforemailpermission($title='Für deine Anfrage ist deine eMail-Adresse erforderlich.'){
 		return ['type' => 'AskForPermissionsConsent',
 		'title' =>$title,
@@ -42,14 +54,127 @@ class BasicFunctions{
 	}
 	function getemail($token){
 		// Create a stream
-		$opts = [ 'http' => [ 'method' => 'GET', 'header' => "Accept: application/json\r\nAuthorization: Bearer " . $token . "\r\n"] ];
+		$opts = [ 'http' => [	'method' => 'GET',
+								'header' => "Accept: application/json\r\nAuthorization: Bearer " . $token . "\r\n"] ];
 		$context = stream_context_create($opts);
 		// Open the file using the HTTP headers set above
 		///////////// CAUTION! INSANITY AHEAD: ENDPOINT api.eu.amazonalexa.com WITH .eu ///////////////////////////
 		return json_decode(file_get_contents('https://api.eu.amazonalexa.com/v2/accounts/~current/settings/Profile.email', false, $context));
 	}
+	
+/*
+                  _         _               _                _  _  _
+ ___  ___  _____ |_| ___  _| | ___  ___    | |_  ___  ___  _| || ||_| ___  ___
+|  _|| -_||     || ||   || . || -_||  _|   |   || .'||   || . || || ||   || . |
+|_|  |___||_|_|_||_||_|_||___||___||_|     |_|_||__,||_|_||___||_||_||_|_||_  |
+                                                                          |___|
+*/	function askforreminderpermission($title='Für deine Anfrage ist deine Freigabe erforderlich.'){
+		return [
+			'type' => 'AskForPermissionsConsent',
+			'title' =>$title,
+			'permissions' => [ "alexa::alerts:reminders:skill:readwrite" ]
+		];
+	}
+	function getactivereminders($token){
+		// Create a stream
+		$opts = [ 'http' => [	'method' => 'GET',
+								'header' => "Accept: application/json\r\nAuthorization: Bearer " . $token . "\r\n"] ];
+		$context = stream_context_create($opts);
+		$reminders = json_decode(file_get_contents('https://api.eu.amazonalexa.com/v1/alerts/reminders', false, $context));
+			
+		if (!strstr($http_response_header[0], '1.1 200')) return false;
+		$return=[0];
+		foreach($reminders->alerts as $item => $reminder){
+			if ($reminder->status == "ON") {
+				$return[$reminder->alertInfo->spokenInfo->content[0]->text] = [
+					'id' => $reminder->alertToken
+				];
+			}
+		}
+		return $return;
+	}
+	function deletereminder($token, $id){
+		// Create a stream
+		$opts = [ 'http' => [	'method' => 'DELETE',
+								'header' => "Accept: application/json\r\nAuthorization: Bearer " . $token . "\r\n"] ];
+		$context = stream_context_create($opts);
+		$return = json_decode(file_get_contents('https://api.eu.amazonalexa.com/v1/alerts/reminders/' . $id, false, $context));
+		return $http_response_header;
+	}
+	function setrecurringreminder($post, $setting){
+		if ($setting){
+			// note that amazon currently does not allow intervals less than 4 hours
+			$recurrenceRules = [];
+			$date = new DateTime(strftime("%H%M%S"));
+			for ($i = 0 ; $i < floor(24 * 3600 / $setting['interval']) ; $i++){
+				$date->add(new DateInterval('PT' . $setting['interval'] . 'S'));
+				array_push($recurrenceRules, 'FREQ=DAILY;BYHOUR=' . intval($date->format('H')) . ';BYMINUTE=' . intval($date->format('i')) . ';BYSECOND=' . intval($date->format('s')) . ';INTERVAL=1;');
+			}
+			$reminder = [
+				'requestTime'  => strftime("%Y-%m-%dT%H:%M:%S.000"),
+				'trigger' => [
+						'type'  => 'SCHEDULED_ABSOLUTE',
+						'scheduledTime' => strftime('%Y-%m-%dT%H:%M:%S.000'),
+						//'timeZoneId' => 'America/Los_Angeles',
+						'recurrence' => [
+						  'startDateTime' => strftime('%Y-%m-%dT%H:%M:%S.000'),
+						  'endDateTime' => strftime('%Y-%m-%dT%H:%M:%S.000', time()+$setting['duration']),
+						  'recurrenceRules' => $recurrenceRules
+						]
+					],
+					'alertInfo' => [
+						'spokenInfo' => [
+							'content' => [[
+								'locale' => $post->request->locale, 
+								'text' => $setting['text'],
+								'ssml' => '<speak> ' . $setting['text'] . '</speak>'
+							]]
+						]
+					],
+					'pushNotification'  => [                            
+						'status'  => 'ENABLED'         
+					]
+			];
+			// Create a stream
+			$json=stripslashes(json_encode($reminder));
+			$opts = [ 'http' => [	'method' => 'POST',
+									'header' => "Content-length: " . strlen($json) . "\r\nAuthorization: Bearer " . $post->context->System->apiAccessToken . "\r\nContent-Type: application/json\r\n",
+									'content' => $json] ];
+			$context = stream_context_create($opts);
+			$response = json_decode(file_get_contents('https://api.eu.amazonalexa.com/v1/alerts/reminders', false, $context));
+			// ran from the developer console results in an error 403, only via reminder-enabled devices have a 201 status //
+			return [$json, $http_response_header[0]];
+		}
+	}
 
-	// ssml effects
+	// returns ISO-8601 interval format (PnYnMnDTnHnMnS) resolved for speech and in seconds
+	function resolveInterval($interval, $lang='de'){
+		$t=[
+			'fullmatch' => [],
+			'PY' => ['de' => ['Jahr', 'Jahre'], 'en' => ['year', 'years'], 'sec' => 3600*24*365],
+			'PM' => ['de' => ['Monat', 'Monate'], 'en' => ['month', 'months'], 'sec' => 3600*24*30],
+			'PD' => ['de' => ['Tag', 'Tage'], 'en' => ['day', 'days'], 'sec' => 3600*24],
+			'TH' => ['de' => ['Stunde', 'Stunden'], 'en' => ['hour', 'hours'], 'sec' => 3600],
+			'TM' => ['de' => ['Minute', 'Minuten'], 'en' => ['minute', 'minutes'], 'sec' => 60],
+			'TS' => ['de' => ['Sekunde', 'Sekunden'], 'en' => ['second', 'seconds'], 'sec' => 1],
+		];
+		preg_match_all('/P(?>(\d+)Y)?(?>(\d+)M)?(?>(\d+)D)?T(?>(\d+)H)?(?>(\d+)M)?(?>(\d+)S)?/is', $interval, $matches);
+		foreach ($matches as $index => $value){
+			if ($index < 4 ) continue; //ignore years, months and days for now
+			$out['speech'] .= $value[0] ? $value[0] . ' ' . $t[array_keys($t)[$index]][$lang][$value[0] > 1 ? 1 : 0] . ' ' : '';
+			//returns just an approximation given months and years!!!
+			$out['seconds'] += $value[0] * $t[array_keys($t)[$index]]['sec'];
+		}
+		return $out;
+	}
+
+/*
+                  _
+ ___  ___  _____ | |
+|_ -||_ -||     || |
+|___||___||_|_|_||_|
+
+*/	// ssml effects
 	function whisper($text){ return '<amazon:effect name="whispered">' . $text . '</amazon:effect>'; }
 	function emphase($text){ return '<emphasis level="strong">' . $text . '</emphasis>'; }
 	function date($text){ return '<say-as interpret-as="date" format="dmy">' . $text . '</say-as>'; }
@@ -57,27 +182,6 @@ class BasicFunctions{
 	function number($text){ return '<say-as interpret-as="number">' . $text . '</say-as>'; }
 	function interject($interjection){ return'<say-as interpret-as="interjection">' . $interjection . '</say-as>';}
 	function phoneme($text, $phonetic){ return'<phoneme alphabet="ipa" ph="' . $phonetic . '">' . $text . '</phoneme>';}
-
-	// returns ISO-8601 duration format (PnYnMnDTnHnMnS) resolved for speech and in seconds
-	function resolveDuration($duration, $lang='de'){
-		$t=[
-			[],
-			['de' => ['Jahr', 'Jahre'], 'en' => ['year', 'years'], 'sec' => 3600*24*365],
-			['de' => ['Monat', 'Monate'], 'en' => ['month', 'months'], 'sec' => 3600*24*30],
-			['de' => ['Tag', 'Tage'], 'en' => ['day', 'days'], 'sec' => 3600*24],
-			['de' => ['Stunde', 'Stunden'], 'en' => ['hour', 'hours'], 'sec' => 3600],
-			['de' => ['Minute', 'Minuten'], 'en' => ['minute', 'minutes'], 'sec' => 60],
-			['de' => ['Sekunde', 'Sekunden'], 'en' => ['second', 'seconds'], 'sec' => 1],
-		];
-		preg_match_all('/P(?>(\d+)Y)?(?>(\d+)M)?(?>(\d+)D)?T(?>(\d+)H)?(?>(\d+)M)?(?>(\d+)S)?/is', $duration, $matches);
-		foreach ($matches as $index => $value){
-			if ($index == 0) continue;
-			$out['speech'] .= $value[0] ? $value[0] . ' ' . $t[$index][$lang][$value[0] > 1 ? 1 : 0] . ' ' : '';
-			//returns just an approximation given months and years!!!
-			$out['seconds'] += $value[0] * $t[$index]['sec'];
-		}
-		return $out;
-	}
 }
 
 class OutputFunctions{
