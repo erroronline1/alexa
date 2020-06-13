@@ -9,7 +9,9 @@ if ($ALEXA->verified($post, $rawpost, $RemindmeAPPId)){
 	// $post->request->locale might be 'de_DE' or 'en_US' or something like that and can be used to determine language output
 	// since this shall support various english regions i concentrate on the language and not on the region
 	$lang = substr($post->request->locale, 0, 2);
-	$timelimit=3600*4; //amazon does not allow recurring reminders less that 4 hours apart
+	// amazon does not allow recurring reminders less that 4 hours apart, and onyl dayly, weekly and monthly recurrances therefore
+	// no intervals of e.g. 28 hours
+	$timelimit=[3600*4, 3600*24]; // min, max
 	
 	$answers = [
 		'start' => [	'de' => 'ich versuche dich regelmäßig zu erinnern',
@@ -22,8 +24,8 @@ if ($ALEXA->verified($post, $rawpost, $RemindmeAPPId)){
 						'en' => 'an error occured. please try again.'],
 		'errornotsupported' => ['de' => 'es trat ein fehler auf. dieses gerät unterstützt möglicherweise keine erinnerungen.',
 						'en' => 'an error occured. this device might not support reminders.'],
-		'errortimelimit' => ['de' => 'es trat ein fehler auf. amazon erlaubt keine kürzeren intervalle als 4 stunden.',
-						'en' => 'an error occured. amazon does not allow intervals less than four hours.'],
+		'errortimelimit' => ['de' => 'es trat ein fehler auf. amazon erlaubt keine kürzeren intervalle als 4 oder längere als 24 stunden.',
+						'en' => 'an error occured. amazon does not allow intervals less than 4 or more than 24 hours.'],
 		'no_reminders' => ['de' => 'du hast keine aktiven erinnerungen',
 						'en' => 'there are no active reminders'],
 		'unset_reprompt' => ['de' => 'soll ich eine erinnerung beenden?',
@@ -91,7 +93,7 @@ if ($ALEXA->verified($post, $rawpost, $RemindmeAPPId)){
 				if (key_exists($topic, $activereminders)) $ALEXA->deletereminder($AccessToken,$activereminders[$topic]['id']);
 
 				$duration = $ALEXA->resolveInterval($interval, $lang);
-				if ($duration['seconds']<$timelimit){
+				if ($duration['seconds']<$timelimit[0] || $duration['seconds']>$timelimit[1]){
 					$say= $answers['errortimelimit'][$lang];
 				}
 				else {
