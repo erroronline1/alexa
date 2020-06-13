@@ -1,0 +1,320 @@
+// german language model
+// i know comments are forbidden in json-files...
+
+{
+	"interactionModel": {
+		"languageModel": {
+			"invocationName": "remind me",
+			"modelConfiguration": {
+				"fallbackIntentSensitivity": {
+					"level": "LOW"
+				}
+			},
+			"intents": [{
+					"name": "AMAZON.FallbackIntent",
+					"samples": []
+				},
+				{
+					"name": "AMAZON.CancelIntent",
+					"samples": []
+				},
+				{
+					"name": "AMAZON.HelpIntent",
+					"samples": []
+				},
+				{
+					"name": "AMAZON.StopIntent",
+					"samples": []
+				},
+				{
+					"name": "AMAZON.NavigateHomeIntent",
+					"samples": []
+				},
+				{
+					"name": "set_topic",
+					"slots": [{
+						"name": "topic",
+						"type": "topic"
+					}],
+					"samples": [
+						"to remind me to {topic}",
+						"to remind me of {topic}",
+						"remind me to {topic}",
+						"remind me of {topic}"
+					]
+				},
+				{
+					"name": "set_time",
+					"slots": [{
+							"name": "timespan",
+							"type": "AMAZON.DURATION"
+						},
+						{
+							"name": "topic",
+							"type": "topic"
+						}
+					],
+					"samples": [
+						"to remind me every {timespan} to {topic}",
+						"to remind me every {timespan} of {topic}",
+						"remind me every {timespan} to {topic}",
+						"remind me every {timespan} of {topic}",
+						"every {timespan}",
+						"{timespan}"
+					]
+				},
+				{
+					"name": "unset",
+					"slots": [],
+					"samples": [
+						"what you should remind me of",
+						"what my reminders are",
+						"what are my reminders",
+						"what do you remind me of",
+						"delete reminders",
+						"delete reminder",
+						"cancel reminder",
+						"cancel reminders",
+						"stop reminder",
+						"stop reminders"
+					]
+				},
+				{
+					"name": "unset_topic",
+					"slots": [{
+						"name": "topic",
+						"type": "topic"
+					}],
+					"samples": [
+						"to delete my reminder of {topic}",
+						"to delete my reminder to {topic}",
+						"to cancel my reminder of {topic}",
+						"to cancel my reminder to {topic}",
+						"to stop my reminder of {topic}",
+						"to stop my reminder to {topic}",
+						"to delete the reminder of {topic}",
+						"to delete the reminder to {topic}",
+						"to cancel the reminder of {topic}",
+						"to cancel the reminder to {topic}",
+						"to stop the reminder of {topic}",
+						"to stop the reminder to {topic}",
+						"stop reminding me of {topic}",
+						"delete my reminder of {topic}",
+						"delete my reminder to {topic}",
+						"cancel my reminder of {topic}",
+						"cancel my reminder to {topic}",
+						"stop my reminder of {topic}",
+						"stop my reminder to {topic}",
+						"delete the reminder of {topic}",
+						"delete the reminder to {topic}",
+						"cancel the reminder of {topic}",
+						"cancel the reminder to {topic}",
+						"stop the reminder of {topic}",
+						"stop the reminder to {topic}",
+						"delete {topic}",
+						"cancel {topic}",
+						"stop {topic}"
+					]
+				}
+			],
+			"types": [{
+				"name": "topic",
+				"values": [{
+						"name": {
+							"value": "save",
+							"synonyms": [
+								"save"
+							]
+						}
+					},
+					{
+						"name": {
+							"value": "relax",
+							"synonyms": [
+								"close eyes",
+								"sleep"
+							]
+						}
+					},
+					{
+						"name": {
+							"value": "move",
+							"synonyms": [
+								"workout",
+								"walk"
+							]
+						}
+					},
+					{
+						"name": {
+							"value": "drink",
+							"synonyms": [
+								"eat"
+							]
+						}
+					}
+				]
+			}]
+		}
+	}
+}
+
+// german language model
+// i know comments are forbidden in json-files...
+
+{
+	"interactionModel": {
+		"languageModel": {
+			"invocationName": "erinnere mich",
+			"modelConfiguration": {
+				"fallbackIntentSensitivity": {
+					"level": "LOW"
+				}
+			},
+			"intents": [{
+					"name": "AMAZON.FallbackIntent",
+					"samples": []
+				},
+				{
+					"name": "AMAZON.CancelIntent",
+					"samples": []
+				},
+				{
+					"name": "AMAZON.HelpIntent",
+					"samples": []
+				},
+				{
+					"name": "AMAZON.StopIntent",
+					"samples": []
+				},
+				{
+					"name": "AMAZON.NavigateHomeIntent",
+					"samples": []
+				},
+				{
+					"name": "set_topic",
+					"slots": [{
+						"name": "topic",
+						"type": "topic"
+					}],
+					"samples": [
+						"mich an {topic} zu erinnern",
+						"erinnere mich daran zu {topic}",
+						"erinnere mich zu {topic}",
+						"erinnere mich an {topic}"
+					]
+				},
+				{
+					"name": "set_time",
+					"slots": [{
+							"name": "timespan",
+							"type": "AMAZON.DURATION"
+						},
+						{
+							"name": "topic",
+							"type": "topic"
+						}
+					],
+					"samples": [
+						"mich jede {timespan} an {topic} zu erinnern",
+						"mich alle {timespan} an {topic} zu erinnern",
+						"erinnere mich jede {timespan} daran zu {topic}",
+						"erinnere mich alle {timespan} daran zu {topic}",
+						"erinnere mich daran jede {timespan} zu {topic}",
+						"erinnere mich daran alle {timespan} zu {topic}",
+						"erinnere mich jede {timespan} zu {topic}",
+						"erinnere mich alle {timespan} zu {topic}",
+						"erinnere mich jede {timespan} an {topic}",
+						"erinnere mich alle {timespan} an {topic}",
+						"jede {timespan}",
+						"alle {timespan}",
+						"{timespan}"
+					]
+				},
+				{
+					"name": "unset",
+					"slots": [],
+					"samples": [
+						"woran du mich erinnern sollst",
+						"was meine erinnerungen sind",
+						"woran sollst du mich erinnern",
+						"was sind meine erinnerungen",
+						"woran erinnerst du mich",
+						"lösche erinnerung",
+						"beende erinnerung",
+						"erinnern löschen",
+						"erinnern beenden",
+						"erinnerung beenden",
+						"erinnerung löschen"
+					]
+				},
+				{
+					"name": "unset_topic",
+					"slots": [{
+						"name": "topic",
+						"type": "topic"
+					}],
+					"samples": [
+						"meine erinnerung zu {topic} zu beenden",
+						"meine erinnerung an {topic} zu beenden",
+						"die erinnerung zu {topic} zu löschen",
+						"die erinnerung zu {topic} zu beenden",
+						"die erinnerung an {topic} zu löschen",
+						"die erinnerung an {topic} zu beenden",
+						"mich nicht länger an {topic} zu erinnern",
+						"mich nicht mehr an {topic} zu erinnern",
+						"erinnere mich nicht länger an {topic}",
+						"erinnere mich nicht mehr an {topic}",
+						"beende erinnerung für {topic}",
+						"lösche erinnerung für {topic}",
+						"stoppe erinnerung für {topic}",
+						"lösche erinnerung an {topic}",
+						"beende erinnerung an {topic}",
+						"stoppe erinnerung an {topic}",
+						"beende {topic}",
+						"stoppe {topic}",
+						"lösche {topic}"
+					]
+				}
+			],
+			"types": [{
+				"name": "topic",
+				"values": [{
+						"name": {
+							"value": "speichern",
+							"synonyms": [
+								"sichern"
+							]
+						}
+					},
+					{
+						"name": {
+							"value": "entspannen",
+							"synonyms": [
+								"augen schließen",
+								"schlafen"
+							]
+						}
+					},
+					{
+						"name": {
+							"value": "bewegen",
+							"synonyms": [
+								"turnen",
+								"laufen"
+							]
+						}
+					},
+					{
+						"name": {
+							"value": "trinken",
+							"synonyms": [
+								"essen"
+							]
+						}
+					}
+				]
+			}]
+		}
+	}
+}
