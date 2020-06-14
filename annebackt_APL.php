@@ -304,7 +304,7 @@ elseif ($post->request->type == "IntentRequest"){
 						
 		$OUTPUT->card->image = $OUTPUT->display->image = $randcat->src->medium; //"https://erroronline.one/column4/sslmedia.php?../../asb/design/icon192x192.png";
 		$OUTPUT->card->text = $OUTPUT->display->text = "Hier, ein Bild von einer Katze...";
-		$OUTPUT->card->subtext = $OUTPUT->display->subtext = "(von " . $randcat->photographer . ")";
+		$OUTPUT->card->subtext = $OUTPUT->display->subtext = "(von " . $randcat->photographer . " via pexels.com)";
 	}
 }
 
