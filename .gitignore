@@ -1,4 +1,4 @@
 /nonpublic.*
-*.png
+*512.png
 _*
 index.php
