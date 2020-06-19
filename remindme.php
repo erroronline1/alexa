@@ -2,6 +2,11 @@
 
 include ('nonpublic.php'); // application ids, database connections, etc.
 
+/*todo according to certification feedback
+set up voice activated permission
+>> https://developer.amazon.com/de-DE/docs/alexa/smapi/voice-permissions-for-reminders.html
+*/
+
 if ($ALEXA->verified($post, $rawpost, $RemindmeAPPId)){
 	
 	//read slots
@@ -14,18 +19,24 @@ if ($ALEXA->verified($post, $rawpost, $RemindmeAPPId)){
 	$timelimit=[3600*4, 3600*24]; // min, max
 	
 	$answers = [
-		'start' => [	'de' => 'ich versuche dich regelmäßig zu erinnern',
-						'en' => 'i will try to remind you regulary'],
+		'reminder_from' => ['de' => 'Erinnerung von erinnere mich: ',
+						'en' => 'Reminder from remind me: '],
+		'start' => [	'de' => 'lass dich vom erinnerungsmanager regelmäßig erinnern. frage zum beispiel "was sind meine erinnerungen" oder erstelle eine neue. frage nach hilfe, wenn du nicht weiter weißt. ',
+						'en' => 'let the reminder manager remind you regulary. ask for instance "what are my reminders" or set up a new one. ask for help if you get stuck. '],
+		'welcomeback' => ['de' => 'willkommen zurück! ',
+						'en' => 'welcome back! '],
 		'reminder_permission' => ['de' => 'Für die Erinnerungen ist deine Freigabe erforderlich.',
 						'en' => 'For reminders your permission is necessary.'],
+		'reminder_permission2' => ['de' => ' die freigabe für erinnerungen durch diesen skill solltest du vor der benutzung erteilen. dies kannst du jetzt in deiner alexa-app tun.',
+						'en' => ' the permission for reminders through this skill should be granted before use. you can do this now from the alexa-app.'],
 		'set_topic_reprompt' => ['de' => 'in welchen abständen darf ich dich erinnern?',
 						'en' => 'in which intervals i should remind you?'],
 		'error' => [	'de' => 'es trat ein fehler auf, bitte versuche es nochmal',
 						'en' => 'an error occured. please try again.'],
 		'errornotsupported' => ['de' => 'es trat ein fehler auf. dieses gerät unterstützt möglicherweise keine erinnerungen.',
 						'en' => 'an error occured. this device might not support reminders.'],
-		'errortimelimit' => ['de' => 'es trat ein fehler auf. amazon erlaubt keine kürzeren intervalle als 4 oder längere als 24 stunden.',
-						'en' => 'an error occured. amazon does not allow intervals less than 4 or more than 24 hours.'],
+		'errortimelimit' => ['de' => 'tut mir leid, amazon erlaubt keine kürzeren intervalle als 4 oder längere als 24 stunden.',
+						'en' => 'i am sorry, amazon does not allow intervals less than 4 or more than 24 hours.'],
 		'no_reminders' => ['de' => 'du hast keine aktiven erinnerungen',
 						'en' => 'there are no active reminders'],
 		'unset_reprompt' => ['de' => 'soll ich eine erinnerung beenden?',
@@ -40,14 +51,15 @@ if ($ALEXA->verified($post, $rawpost, $RemindmeAPPId)){
 						'en' => 'what now?'],
 		'bye' => [		'de' => 'ok, wir hören voneinander',
 						'en' => 'ok, we´ll keep in touch'],
-		'help' => [		'de' => 'dieser skill kann dich regelmäßig an etwas erinnern. sage "erinnere mich alle zwei stunden an trinken", "was sind meine erinnerungen" oder "beende erinnerung an trinken". mehr informationen stehen in deiner alexa-app.',
-						'en' => 'this skill can remind you regulary. say "remind me every two hours to drink", "what are my reminders" and "stop reminding me of drink". you  will find more information in your alexa-app.'],
+		'help' => [		'de' => 'dieser skill kann dich regelmäßig an etwas erinnern. sage "erinnere mich alle vier stunden an trinken", "was sind meine erinnerungen" oder "beende erinnerung an trinken". mehr informationen stehen in deiner alexa-app.',
+						'en' => 'this skill can remind you regulary. say "remind me every four hours to drink", "what are my reminders" and "stop reminding me of drink". you  will find more information in your alexa-app.'],
 		'help_card_title' => ['de' => "Was kann 'Erinnere mich'?",
 						'en' => "What does 'remind me' do?"],
 		'help_card_text' => ['de' => "Dieser Skill kann dich in regelmäßigen Abständen an etwas erinnern.\r\n"
 								."Zur Zeit unterstützt der Skill wiederholende Erinnerungen innerhalb eines Tages. "
 								."Du kannst dich so an \"Trinken\", \"Ausruhen\" oder dein \"Kurz-Workout\" erinnern lassen. "
-								."Starte den Skill und sage: \"Erinnere mich alle zwei Stunden an Trinken\".\r\n"
+								."Starte den Skill und sage: \"Erinnere mich alle vier Stunden an Trinken\".\r\n"
+								."Du kannst Erinnerungen zwischen 4 und 24 Stunden einrichten."
 								."Um eine Übersicht über deine Erinnerungen zu erhalten sage: \"Was sind meine Erinnerungen\".\r\n"
 								."Löschen kannst du, indem du sagst: \"Beende Erinnerung an {was auch immer}\".\r\n \r\n"
 								."Du musst in deiner Alexa-App die Berechtigung für die Erinnerungsfunktion erteilen. "
@@ -55,74 +67,30 @@ if ($ALEXA->verified($post, $rawpost, $RemindmeAPPId)){
 						'en' => "This skill reminds you regulary.\r\n"
 								."Currently the skill supports repetitive reminders within a day. "
 								."You can remind yourself to \"drink\", \"relax\" or your \"short workout\" this way. "
-								."Start the skill and say: \"remind me every two hours to drink\".\r\n"
+								."Start the skill and say: \"remind me every four hours to drink\".\r\n"
+								."You can set up reminders between 4 and 24 hours"
 								."To get an overview of current reminders say: \"what are my reminders\".\r\n"
 								."Delete reminders by saying: \"stop reminding me of {whatever}\".\r\n \r\n"
 								."You have to give the permission for reminders within the Alexa-app. "
 								."Currently the reccuring reminders have a lifetime of one year."],
 	];
 	
-	if ($post->request->type == "LaunchRequest"){
+	if ($post->request->type == "LaunchRequest" || $IntentName == "unset"){
 		$OUTPUT->speak = $answers['start'][$lang];
-		$OUTPUT->reprompt = $answers['help'][$lang]; //learnt that a reprompt is expected on launch. the skill works otherwise but the console throws an error.
-	}
-	elseif ($IntentName == "AMAZON.HelpIntent"){
-		$OUTPUT->speak = $OUTPUT->reprompt = $answers['help'][$lang];
-	}
-	elseif ($IntentName == "set_topic"){
-		$topic = $post->request->intent->slots->topic->value;
-		$answers['set_topic'] = [	'de' => 'in welchen abständen darf ich dich an ' . $topic . ' erinnern?',
-									'en' => 'in which intervals i should remind you to ' . $topic . '?'];
-
-		$OUTPUT->sessionAttributes = ['TOPIC'=>$topic];
-		$OUTPUT->speak = $answers['set_topic'][$lang];
-		$OUTPUT->reprompt = $answers['set_topic_reprompt'][$lang];
-
-	}
-	elseif ($IntentName == "set_time" || $post->session->attributes->TOPIC){
 		if (!$ALEXA->getactivereminders($AccessToken)) {
-			$OUTPUT->speak = $answers['reminder_permission'][$lang];
+//			$OUTPUT->voicepermission = $ALEXA->askforreminderpermissionvoice();
+			$OUTPUT->speak .= $answers['reminder_permission'][$lang] . $answers['reminder_permission2'][$lang];
 			$OUTPUT->permission = $ALEXA->askforreminderpermission($answers['reminder_permission'][$lang]);
 		}
 		else {
-			$topic = $post->session->attributes->TOPIC;
-			$topic = !$topic ? $post->request->intent->slots->topic->value : $topic;
-			$interval = $post->request->intent->slots->timespan->value;
-			if ($interval && $topic){
-				$activereminders=$ALEXA->getactivereminders($AccessToken);
-				if (key_exists($topic, $activereminders)) $ALEXA->deletereminder($AccessToken,$activereminders[$topic]['id']);
+			if ($post->request->type == "LaunchRequest") $OUTPUT->speak = $answers['welcomeback'][$lang];
+			else $OUTPUT->speak = '';
 
-				$duration = $ALEXA->resolveInterval($interval, $lang);
-				if ($duration['seconds']<$timelimit[0] || $duration['seconds']>$timelimit[1]){
-					$say= $answers['errortimelimit'][$lang];
-				}
-				else {
-					$set= $ALEXA->setrecurringreminder($post, ['interval' => $duration['seconds'], 'text' => $topic, 'duration' => 3600*24*365]);
-					if (strstr($set[0], '1.1 403')){
-						$say = $answers['errornotsupported'][$lang];
-					}
-					else {
-						$answers['set_time'] = ['de' => 'ich erinnere dich alle ' . $duration['speech'] . ' an ' . $topic,
-												'en' => 'i try to remind you every ' . $duration['speech'] . ' to ' . $topic];
-						$say = $answers['set_time'][$lang];
-					}
-				}
-			}
-			else $say = $answers['error'][$lang];
-			$OUTPUT->speak = $say;	
-		}
-	}
-	elseif ($IntentName == "unset"){
-		if (!$ALEXA->getactivereminders($AccessToken)) {
-			$OUTPUT->speak = $answers['reminder_permission'][$lang];
-			$OUTPUT->permission = $ALEXA->askforreminderpermission($answers['reminder_permission'][$lang]);
-		}
-		else {
 			$activereminders=$ALEXA->getactivereminders($AccessToken);
 			if (count($activereminders) > 1){
 				$result_array=[];
 				foreach ($activereminders as $key => $value){
-					if ($value!=0) $result_array[] = [$answers['to'][$lang], $key];
+					if ($value!=0) $result_array[] = [$answers['to'][$lang], str_replace($answers['reminder_from'][$lang], '', $key)];
 				}
 				for ($i=0 ; $i<count($result_array) ; $i++){
 					$result .= ($i < count($result_array)-1 || count($result_array) < 2) ? ', ' : ' ' . $answers['conjunction'][$lang] . ' ';
@@ -132,22 +100,89 @@ if ($ALEXA->verified($post, $rawpost, $RemindmeAPPId)){
 
 				$answers['reminders'] = [	'de' => 'zur zeit erinnere ich dich ' . $result . '. wenn ich etwas beenden soll sage zum beispiel: beende erinnerung für ' . $result_array[rand(0, count($result_array) - 1)][1],
 											'en' => 'currently i remind you ' . $result . '. if i should stop a reminder say some thing like: stop reinding me of ' . $result_array[rand(0, count($result_array) - 1)][1]];
-				$OUTPUT->speak = $answers['reminders'][$lang];
+				$OUTPUT->speak .= $answers['reminders'][$lang];
 				$OUTPUT->reprompt = $answers['unset_reprompt'][$lang];
 			}
-			else $OUTPUT->speak = $answers['no_reminders'][$lang];
+			else $OUTPUT->speak .= $answers['no_reminders'][$lang];
+
 		}
+		$OUTPUT->reprompt = $OUTPUT->reprompt ? : $answers['help'][$lang]; //learnt that a reprompt is expected on launch. the skill works otherwise but the console throws an error.
 	}
-	elseif ($IntentName == "unset_topic"){
+	elseif ($IntentName == "AMAZON.HelpIntent"){
+		$OUTPUT->speak = $OUTPUT->reprompt = $answers['help'][$lang];
+	}
+	elseif ($IntentName == "set_topic"){
 		if (!$ALEXA->getactivereminders($AccessToken)) {
-			$OUTPUT->speak = $answers['reminder_permission'][$lang];
+			$OUTPUT->speak = $answers['reminder_permission'][$lang] . $answers['reminder_permission2'][$lang];
 			$OUTPUT->permission = $ALEXA->askforreminderpermission($answers['reminder_permission'][$lang]);
 		}
 		else {
 			$topic = $post->request->intent->slots->topic->value;
+			$answers['set_topic'] = [	'de' => 'in welchen abständen darf ich dich an ' . $topic . ' erinnern?',
+										'en' => 'in which intervals i should remind you to ' . $topic . '?'];
+
+			$OUTPUT->sessionAttributes = ['TOPIC'=>$topic];
+			$OUTPUT->speak = $answers['set_topic'][$lang];
+			$OUTPUT->reprompt = $answers['set_topic_reprompt'][$lang];
+		}
+	}
+	elseif ($IntentName == "set_time" || ($post->session->attributes->TOPIC && !$post->session->attributes->INTERVAL)){
+		if (!$ALEXA->getactivereminders($AccessToken)) {
+			$OUTPUT->speak = $answers['reminder_permission'][$lang] . $answers['reminder_permission2'][$lang];
+			$OUTPUT->permission = $ALEXA->askforreminderpermission($answers['reminder_permission'][$lang]);
+		}
+		else {
+			$topic = $post->session->attributes->TOPIC;
+			$topic = !$topic ? $post->request->intent->slots->topic->value : $topic;
+			$interval = $post->request->intent->slots->timespan->value;
+			if ($interval && $topic){
+				$duration = $ALEXA->resolveInterval($interval, $lang);
+				if ($duration['seconds']<$timelimit[0] || $duration['seconds']>$timelimit[1]){
+					$say= $answers['errortimelimit'][$lang];
+				}
+				else {
+					$answers['set_time'] = ['de' => 'ich soll dich alle ' . $duration['speech'] . ' an ' . $topic . ' erinnern?',
+											'en' => 'you want me to remind you every ' . $duration['speech'] . ' to ' . $topic . '?'];
+					$say = $answers['set_time'][$lang];
+					$OUTPUT->sessionAttributes = ['TOPIC' => $topic, 'INTERVAL' => $duration['seconds'], 'INTERVALSAY' => $duration['speech']];
+					$OUTPUT->reprompt = $say;
+				}
+			}
+			else $say = $answers['error'][$lang];
+			$OUTPUT->speak = $say;
+		}
+	}
+	elseif ($IntentName == "AMAZON.YesIntent" && $post->session->attributes->TOPIC && $post->session->attributes->INTERVAL){
+		$topic = $post->session->attributes->TOPIC;
+		$topic_with_from = $answers['reminder_from'][$lang].$topic;
+		$interval = $post->session->attributes->INTERVAL;
+		$intervalsay = $post->session->attributes->INTERVALSAY;
+		$activereminders = $ALEXA->getactivereminders($AccessToken);
+		
+		if (key_exists($topic_with_from, $activereminders)) $ALEXA->deletereminder($AccessToken,$activereminders[$topic_with_from]['id']);
+		
+		$set= $ALEXA->setrecurringreminder($post, ['interval' => $interval, 'text' => $topic_with_from, 'duration' => 3600*24*365], $post->request->timestamp);
+		if (!strstr($set[0], '1.1 201')){
+			$say = $answers['errornotsupported'][$lang];
+		}
+		else {
+			$answers['set_time'] = ['de' => 'ok, ich erinnere dich alle ' . $intervalsay . ' an ' . $topic,
+									'en' => 'ok, i try to remind you every ' . $intervalsay . ' to ' . $topic];
+			$say = $answers['set_time'][$lang];
+		}
+		$OUTPUT->speak = $say;
+	}
+	elseif ($IntentName == "unset_topic"){
+		if (!$ALEXA->getactivereminders($AccessToken)) {
+			$OUTPUT->speak = $answers['reminder_permission'][$lang] . $answers['reminder_permission2'][$lang];
+			$OUTPUT->permission = $ALEXA->askforreminderpermission($answers['reminder_permission'][$lang]);
+		}
+		else {
+			$topic = $post->request->intent->slots->topic->value;
+			$topic_with_from = $answers['reminder_from'][$lang].$topic;
 			$activereminders=$ALEXA->getactivereminders($AccessToken);
-			if (key_exists($topic, $activereminders)){
-				$ALEXA->deletereminder($AccessToken,$activereminders[$topic]['id']);
+			if (key_exists($topic_with_from, $activereminders)){
+				$ALEXA->deletereminder($AccessToken,$activereminders[$topic_with_from]['id']);
 				$answers['deleted'] = [	'de' => 'ich erinnere dich nun nicht mehr an ' . $topic,
 										'en' => 'i will not longer remind you of ' . $topic];
 			}
@@ -164,7 +199,7 @@ if ($ALEXA->verified($post, $rawpost, $RemindmeAPPId)){
         $OUTPUT->card->image = "https://erroronline.one/column4/sslmedia.php?../../asb/design/icon256x256.png";
 		$OUTPUT->card->text = $answers['help_card_text'][$lang];
 	}
-	elseif ($IntentName == "AMAZON.StopIntent" || $IntentName == "AMAZON.CancelIntent"){
+	elseif ($IntentName == "AMAZON.StopIntent" || $IntentName == "AMAZON.CancelIntent" || $IntentName == "AMAZON.NoIntent"){
 		$OUTPUT->speak = $answers['bye'][$lang];
 	}
 	else {
