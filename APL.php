@@ -75,6 +75,18 @@ class BasicFunctions{
 			'permissions' => [ "alexa::alerts:reminders:skill:readwrite" ]
 		];
 	}
+	function askforreminderpermissionvoice(){
+		return [
+			'type' => 'Connections.SendRequest',
+			'name' => 'AskFor',
+			'payload' => [
+				'@type' => 'AskForPermissionsConsentRequest',
+				'@version' => '1',
+				'permissionScope' => 'alexa::alerts:reminders:skill:readwrite'
+			],
+			'token' => ''
+		];
+	}
 	function getactivereminders($token){
 		// Create a stream
 		$opts = [ 'http' => [	'method' => 'GET',
@@ -101,24 +113,25 @@ class BasicFunctions{
 		$return = json_decode(file_get_contents('https://api.eu.amazonalexa.com/v1/alerts/reminders/' . $id, false, $context));
 		return $http_response_header;
 	}
-	function setrecurringreminder($post, $setting){
-		if ($setting){
+	function setrecurringreminder($post, $setting, $requesttime){
+		if ($setting && $requesttime){
 			// note that amazon currently does not allow intervals less than 4 hours
 			$recurrenceRules = [];
-			$date = new DateTime(strftime("%H%M%S"));
+			$unixtime=strtotime($requesttime);
+			$date = new DateTime(strftime("%H%M%S", $unixtime));
 			for ($i = 0 ; $i < floor(24 * 3600 / $setting['interval']) ; $i++){
 				$date->add(new DateInterval('PT' . $setting['interval'] . 'S'));
 				array_push($recurrenceRules, 'FREQ=DAILY;BYHOUR=' . intval($date->format('H')) . ';BYMINUTE=' . intval($date->format('i')) . ';BYSECOND=' . intval($date->format('s')) . ';INTERVAL=1;');
 			}
 			$reminder = [
-				'requestTime'  => strftime("%Y-%m-%dT%H:%M:%S.000"),
+				'requestTime'  => strftime("%Y-%m-%dT%H:%M:%S.000", $unixtime),
 				'trigger' => [
 						'type'  => 'SCHEDULED_ABSOLUTE',
-						'scheduledTime' => strftime('%Y-%m-%dT%H:%M:%S.000'),
+						'scheduledTime' => strftime('%Y-%m-%dT%H:%M:%S.000', $unixtime),
 						//'timeZoneId' => 'America/Los_Angeles',
 						'recurrence' => [
-						  'startDateTime' => strftime('%Y-%m-%dT%H:%M:%S.000'),
-						  'endDateTime' => strftime('%Y-%m-%dT%H:%M:%S.000', time()+$setting['duration']),
+						  'startDateTime' => strftime('%Y-%m-%dT%H:%M:%S.000', $unixtime),
+						  'endDateTime' => strftime('%Y-%m-%dT%H:%M:%S.000', $unixtime + $setting['duration']),
 						  'recurrenceRules' => $recurrenceRules
 						]
 					],
@@ -143,7 +156,7 @@ class BasicFunctions{
 			$context = stream_context_create($opts);
 			$response = json_decode(file_get_contents('https://api.eu.amazonalexa.com/v1/alerts/reminders', false, $context));
 			// ran from the developer console results in an error 403, only via reminder-enabled devices have a 201 status //
-			return [$json, $http_response_header[0]];
+			return [$http_response_header[0], $json];
 		}
 	}
 
@@ -713,6 +726,9 @@ class OutputFunctions{
 							]
 						]
 					]);
+			}
+			if ($this->voicepermission) {
+				array_push($responseArray['response']['directives'], $this->voicepermission);
 			}
 		}
 
