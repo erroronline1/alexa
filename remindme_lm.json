@@ -4,7 +4,7 @@
 {
 	"interactionModel": {
 		"languageModel": {
-			"invocationName": "remind me",
+			"invocationName": "reminder manager",
 			"modelConfiguration": {
 				"fallbackIntentSensitivity": {
 					"level": "LOW"
@@ -14,17 +14,33 @@
 					"name": "AMAZON.FallbackIntent",
 					"samples": []
 				},
-				{
-					"name": "AMAZON.CancelIntent",
-					"samples": []
-				},
+                {
+                    "name": "AMAZON.YesIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.NoIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": [
+                        "cancel",
+                        "quit",
+                        "break"
+                    ]
+                },
 				{
 					"name": "AMAZON.HelpIntent",
 					"samples": []
 				},
 				{
 					"name": "AMAZON.StopIntent",
-					"samples": []
+					"samples": [
+						"stop",
+						"thank you",
+						"end"
+					]
 				},
 				{
 					"name": "AMAZON.NavigateHomeIntent",
@@ -71,6 +87,7 @@
 						"what my reminders are",
 						"what are my reminders",
 						"what do you remind me of",
+						"what should you remind me of",
 						"delete reminders",
 						"delete reminder",
 						"cancel reminder",
@@ -165,7 +182,7 @@
 {
 	"interactionModel": {
 		"languageModel": {
-			"invocationName": "erinnere mich",
+			"invocationName": "erinnerungsmanager",
 			"modelConfiguration": {
 				"fallbackIntentSensitivity": {
 					"level": "LOW"
@@ -175,9 +192,20 @@
 					"name": "AMAZON.FallbackIntent",
 					"samples": []
 				},
+                {
+                    "name": "AMAZON.YesIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.NoIntent",
+                    "samples": []
+                },
 				{
 					"name": "AMAZON.CancelIntent",
-					"samples": []
+					"samples": [
+						"abbruch",
+						"abbrechen"
+					]
 				},
 				{
 					"name": "AMAZON.HelpIntent",
@@ -185,7 +213,14 @@
 				},
 				{
 					"name": "AMAZON.StopIntent",
-					"samples": []
+					"samples": [
+						"hör auf",
+						"aufhören",
+						"beenden",
+						"ende",
+						"danke",
+						"stop"
+					]
 				},
 				{
 					"name": "AMAZON.NavigateHomeIntent",
