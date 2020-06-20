@@ -1,10 +1,10 @@
-// german language model
+// english language model
 // i know comments are forbidden in json-files...
 
 {
 	"interactionModel": {
 		"languageModel": {
-			"invocationName": "reminder manager",
+			"invocationName": "knot in the hankerchief",
 			"modelConfiguration": {
 				"fallbackIntentSensitivity": {
 					"level": "LOW"
@@ -14,22 +14,22 @@
 					"name": "AMAZON.FallbackIntent",
 					"samples": []
 				},
-                {
-                    "name": "AMAZON.YesIntent",
-                    "samples": []
-                },
-                {
-                    "name": "AMAZON.NoIntent",
-                    "samples": []
-                },
-                {
-                    "name": "AMAZON.CancelIntent",
-                    "samples": [
-                        "cancel",
-                        "quit",
-                        "break"
-                    ]
-                },
+				{
+					"name": "AMAZON.YesIntent",
+					"samples": []
+				},
+				{
+					"name": "AMAZON.NoIntent",
+					"samples": []
+				},
+				{
+					"name": "AMAZON.CancelIntent",
+					"samples": [
+						"cancel",
+						"quit",
+						"break"
+					]
+				},
 				{
 					"name": "AMAZON.HelpIntent",
 					"samples": []
@@ -56,7 +56,10 @@
 						"to remind me to {topic}",
 						"to remind me of {topic}",
 						"remind me to {topic}",
-						"remind me of {topic}"
+						"remind me of {topic}",
+						"for {topic}",
+						"to {topic}",
+						"make a knot for {topic}"
 					]
 				},
 				{
@@ -75,25 +78,30 @@
 						"to remind me every {timespan} of {topic}",
 						"remind me every {timespan} to {topic}",
 						"remind me every {timespan} of {topic}",
+						"make a knot for {topic} every {timespan}",
+						"make a knot to {topic} every {timespan}",
+						"for {topic} every {timespan}",
+						"to {topic} every {timespan}",
 						"every {timespan}",
 						"{timespan}"
 					]
 				},
 				{
 					"name": "unset",
-					"slots": [],
+					"slots": [{
+						"name": "reminder",
+						"type": "reminder"
+					}],
 					"samples": [
 						"what you should remind me of",
-						"what my reminders are",
-						"what are my reminders",
+						"what my {reminder} are",
+						"what are my {reminder}",
 						"what do you remind me of",
 						"what should you remind me of",
-						"delete reminders",
-						"delete reminder",
-						"cancel reminder",
-						"cancel reminders",
-						"stop reminder",
-						"stop reminders"
+						"delete {reminder}",
+						"cancel {reminder}",
+						"stop {reminder}",
+						"untangle {reminder}"
 					]
 				},
 				{
@@ -101,33 +109,36 @@
 					"slots": [{
 						"name": "topic",
 						"type": "topic"
+					}, {
+						"name": "reminder",
+						"type": "reminder"
 					}],
 					"samples": [
-						"to delete my reminder of {topic}",
-						"to delete my reminder to {topic}",
-						"to cancel my reminder of {topic}",
-						"to cancel my reminder to {topic}",
-						"to stop my reminder of {topic}",
-						"to stop my reminder to {topic}",
-						"to delete the reminder of {topic}",
-						"to delete the reminder to {topic}",
-						"to cancel the reminder of {topic}",
-						"to cancel the reminder to {topic}",
-						"to stop the reminder of {topic}",
-						"to stop the reminder to {topic}",
+						"to delete my {reminder} of {topic}",
+						"to delete my {reminder} to {topic}",
+						"to cancel my {reminder} of {topic}",
+						"to cancel my {reminder} to {topic}",
+						"to stop my {reminder} of {topic}",
+						"to stop my {reminder} to {topic}",
+						"to delete the {reminder} of {topic}",
+						"to delete the {reminder} to {topic}",
+						"to cancel the {reminder} of {topic}",
+						"to cancel the {reminder} to {topic}",
+						"to stop the {reminder} of {topic}",
+						"to stop the {reminder} to {topic}",
 						"stop reminding me of {topic}",
-						"delete my reminder of {topic}",
-						"delete my reminder to {topic}",
-						"cancel my reminder of {topic}",
-						"cancel my reminder to {topic}",
-						"stop my reminder of {topic}",
-						"stop my reminder to {topic}",
-						"delete the reminder of {topic}",
-						"delete the reminder to {topic}",
-						"cancel the reminder of {topic}",
-						"cancel the reminder to {topic}",
-						"stop the reminder of {topic}",
-						"stop the reminder to {topic}",
+						"delete my {reminder} of {topic}",
+						"delete my {reminder} to {topic}",
+						"cancel my {reminder} of {topic}",
+						"cancel my {reminder} to {topic}",
+						"stop my {reminder} of {topic}",
+						"stop my {reminder} to {topic}",
+						"delete the {reminder} of {topic}",
+						"delete the {reminder} to {topic}",
+						"cancel the {reminder} of {topic}",
+						"cancel the {reminder} to {topic}",
+						"stop the {reminder} of {topic}",
+						"stop the {reminder} to {topic}",
 						"delete {topic}",
 						"cancel {topic}",
 						"stop {topic}"
@@ -135,6 +146,18 @@
 				}
 			],
 			"types": [{
+				"name": "reminder",
+				"values": [{
+					"name": {
+						"value": "knot",
+						"synonyms": [
+							"reminder",
+							"knots",
+							"reminders"
+						]
+					}
+				}]
+			}, {
 				"name": "topic",
 				"values": [{
 						"name": {
@@ -176,13 +199,14 @@
 	}
 }
 
+
 // german language model
 // i know comments are forbidden in json-files...
 
 {
 	"interactionModel": {
 		"languageModel": {
-			"invocationName": "erinnerungsmanager",
+			"invocationName": "einen knoten ins taschentuch",
 			"modelConfiguration": {
 				"fallbackIntentSensitivity": {
 					"level": "LOW"
@@ -192,14 +216,14 @@
 					"name": "AMAZON.FallbackIntent",
 					"samples": []
 				},
-                {
-                    "name": "AMAZON.YesIntent",
-                    "samples": []
-                },
-                {
-                    "name": "AMAZON.NoIntent",
-                    "samples": []
-                },
+				{
+					"name": "AMAZON.YesIntent",
+					"samples": []
+				},
+				{
+					"name": "AMAZON.NoIntent",
+					"samples": []
+				},
 				{
 					"name": "AMAZON.CancelIntent",
 					"samples": [
@@ -236,7 +260,9 @@
 						"mich an {topic} zu erinnern",
 						"erinnere mich daran zu {topic}",
 						"erinnere mich zu {topic}",
-						"erinnere mich an {topic}"
+						"erinnere mich an {topic}",
+						"für {topic}",
+						"mache einen knoten für {topic}"
 					]
 				},
 				{
@@ -248,6 +274,10 @@
 						{
 							"name": "topic",
 							"type": "topic"
+						},
+						{
+							"name": "reminder",
+							"type": "reminder"
 						}
 					],
 					"samples": [
@@ -261,6 +291,12 @@
 						"erinnere mich alle {timespan} zu {topic}",
 						"erinnere mich jede {timespan} an {topic}",
 						"erinnere mich alle {timespan} an {topic}",
+						"mache eine {reminder} für {topic} alle {timespan}",
+						"mache einen {reminder} für {topic} alle {timespan}",
+						"mache eine {reminder} alle {timespan} für {topic}",
+						"mache einen {reminder} alle {timespan} für {topic}",
+						"für {topic} alle {timespan}",
+						"für {topic} jede {timespan}",
 						"jede {timespan}",
 						"alle {timespan}",
 						"{timespan}"
@@ -268,19 +304,22 @@
 				},
 				{
 					"name": "unset",
-					"slots": [],
+					"slots": [{
+						"name": "reminder",
+						"type": "reminder"
+					}],
 					"samples": [
 						"woran du mich erinnern sollst",
-						"was meine erinnerungen sind",
+						"was meine {reminder} sind",
 						"woran sollst du mich erinnern",
-						"was sind meine erinnerungen",
+						"was sind meine {reminder}",
 						"woran erinnerst du mich",
-						"lösche erinnerung",
-						"beende erinnerung",
-						"erinnern löschen",
-						"erinnern beenden",
-						"erinnerung beenden",
-						"erinnerung löschen"
+						"lösche {reminder}",
+						"beende {reminder}",
+						"{reminder} löschen",
+						"{reminder} beenden",
+						"{reminder} beenden",
+						"{reminder} löschen"
 					]
 				},
 				{
@@ -288,24 +327,27 @@
 					"slots": [{
 						"name": "topic",
 						"type": "topic"
+					}, {
+						"name": "reminder",
+						"type": "reminder"
 					}],
 					"samples": [
-						"meine erinnerung zu {topic} zu beenden",
-						"meine erinnerung an {topic} zu beenden",
-						"die erinnerung zu {topic} zu löschen",
-						"die erinnerung zu {topic} zu beenden",
-						"die erinnerung an {topic} zu löschen",
-						"die erinnerung an {topic} zu beenden",
+						"meine {reminder} zu {topic} zu beenden",
+						"meine {reminder} an {topic} zu beenden",
+						"die {reminder} zu {topic} zu löschen",
+						"die {reminder} zu {topic} zu beenden",
+						"die {reminder} an {topic} zu löschen",
+						"die {reminder} an {topic} zu beenden",
 						"mich nicht länger an {topic} zu erinnern",
 						"mich nicht mehr an {topic} zu erinnern",
 						"erinnere mich nicht länger an {topic}",
 						"erinnere mich nicht mehr an {topic}",
-						"beende erinnerung für {topic}",
-						"lösche erinnerung für {topic}",
-						"stoppe erinnerung für {topic}",
-						"lösche erinnerung an {topic}",
-						"beende erinnerung an {topic}",
-						"stoppe erinnerung an {topic}",
+						"beende {reminder} für {topic}",
+						"lösche {reminder} für {topic}",
+						"stoppe {reminder} für {topic}",
+						"lösche {reminder} an {topic}",
+						"beende {reminder} an {topic}",
+						"stoppe {reminder} an {topic}",
 						"beende {topic}",
 						"stoppe {topic}",
 						"lösche {topic}"
@@ -313,6 +355,18 @@
 				}
 			],
 			"types": [{
+				"name": "reminder",
+				"values": [{
+					"name": {
+						"value": "erinnerung",
+						"synonyms": [
+							"knoten",
+							"erinnern",
+							"erinnerungen"
+						]
+					}
+				}]
+			}, {
 				"name": "topic",
 				"values": [{
 						"name": {

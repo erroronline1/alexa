@@ -19,10 +19,10 @@ if ($ALEXA->verified($post, $rawpost, $RemindmeAPPId)){
 	$timelimit=[3600*4, 3600*24]; // min, max
 	
 	$answers = [
-		'reminder_from' => ['de' => 'Erinnerung von erinnere mich: ',
-						'en' => 'Reminder from remind me: '],
-		'start' => [	'de' => 'lass dich vom erinnerungsmanager regelmäßig erinnern. frage zum beispiel "was sind meine erinnerungen" oder erstelle eine neue. frage nach hilfe, wenn du nicht weiter weißt. ',
-						'en' => 'let the reminder manager remind you regulary. ask for instance "what are my reminders" or set up a new one. ask for help if you get stuck. '],
+		'reminder_from' => ['de' => 'Taschentuchknoten erinnert: ',
+						'en' => 'Hankerchief knot reminds: '],
+		'start' => [	'de' => 'lass dich vom handtuchknoten regelmäßig erinnern. frage zum beispiel "was sind meine erinnerungen" oder erstelle eine neue. frage nach hilfe, wenn du nicht weiter weißt. ',
+						'en' => 'let the hankerchief knot remind you regulary. ask for instance "what are my reminders" or set up a new one. ask for help if you get stuck. '],
 		'welcomeback' => ['de' => 'willkommen zurück! ',
 						'en' => 'welcome back! '],
 		'reminder_permission' => ['de' => 'Für die Erinnerungen ist deine Freigabe erforderlich.',
@@ -99,7 +99,7 @@ if ($ALEXA->verified($post, $rawpost, $RemindmeAPPId)){
 				$result = substr($result, 1);
 
 				$answers['reminders'] = [	'de' => 'zur zeit erinnere ich dich ' . $result . '. wenn ich etwas beenden soll sage zum beispiel: beende erinnerung für ' . $result_array[rand(0, count($result_array) - 1)][1],
-											'en' => 'currently i remind you ' . $result . '. if i should stop a reminder say some thing like: stop reinding me of ' . $result_array[rand(0, count($result_array) - 1)][1]];
+											'en' => 'currently i remind you ' . $result . '. if i should stop a reminder say some thing like: stop reminding me of ' . $result_array[rand(0, count($result_array) - 1)][1]];
 				$OUTPUT->speak .= $answers['reminders'][$lang];
 				$OUTPUT->reprompt = $answers['unset_reprompt'][$lang];
 			}
