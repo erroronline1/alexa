@@ -4,7 +4,7 @@
 {
 	"interactionModel": {
 		"languageModel": {
-			"invocationName": "knot in the hankerchief",
+			"invocationName": "forgetmenot",
 			"modelConfiguration": {
 				"fallbackIntentSensitivity": {
 					"level": "LOW"
@@ -58,9 +58,7 @@
 						"remind me to {topic}",
 						"remind me of {topic}",
 						"for {topic}",
-						"to {topic}",
-						"make a knot for {topic}"
-					]
+						"to {topic}"					]
 				},
 				{
 					"name": "set_time",
@@ -78,8 +76,6 @@
 						"to remind me every {timespan} of {topic}",
 						"remind me every {timespan} to {topic}",
 						"remind me every {timespan} of {topic}",
-						"make a knot for {topic} every {timespan}",
-						"make a knot to {topic} every {timespan}",
 						"for {topic} every {timespan}",
 						"to {topic} every {timespan}",
 						"every {timespan}",
@@ -206,7 +202,7 @@
 {
 	"interactionModel": {
 		"languageModel": {
-			"invocationName": "einen knoten ins taschentuch",
+			"invocationName": "vergissmeinnicht",
 			"modelConfiguration": {
 				"fallbackIntentSensitivity": {
 					"level": "LOW"
@@ -261,8 +257,7 @@
 						"erinnere mich daran zu {topic}",
 						"erinnere mich zu {topic}",
 						"erinnere mich an {topic}",
-						"für {topic}",
-						"mache einen knoten für {topic}"
+						"für {topic}"
 					]
 				},
 				{
@@ -317,9 +312,7 @@
 						"lösche {reminder}",
 						"beende {reminder}",
 						"{reminder} löschen",
-						"{reminder} beenden",
-						"{reminder} beenden",
-						"{reminder} löschen"
+						"{reminder} beenden"
 					]
 				},
 				{
@@ -360,7 +353,6 @@
 					"name": {
 						"value": "erinnerung",
 						"synonyms": [
-							"knoten",
 							"erinnern",
 							"erinnerungen"
 						]
