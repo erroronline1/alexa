@@ -3,6 +3,15 @@
 include ('nonpublic.php'); // application ids, database connections, etc.
 
 /*todo according to certification feedback
+Please note that we observed that the in the skill's response skill is telling the user that it will inform the user to drink every four hours but when we checked in the companion app the reminder was setted up for wrong timings
+(as example if we asked the skill to set up reminder to drink every four hours at 9 AM then skill must set up the reminder at 1 PM to remind us but here skill is setting up the reminder for 9:30 PM )
+
+Please note that even after providing the permission for reminders, skill is again prompting the user to give the permission.Please note that for every intent the skill is responding same as above.Kindly provide the proper response and make the functionality proper so that the user can set up reminders and achieve the core.Kindly make the necessary changes.
+
+Note that the skill sets the first reminder in 5 hours, but does not set a recurrence, even though it says so. After the first reminder has delivered its notification, the reminder gets deleted.
+
+The skill sets the reminder in five hours, but does not call out the time for which it sets the first reminder of the recurrence. Kindly make sure to inform the user when the first reminder will be set at the beginning of the recurrence.
+
 set up voice activated permission
 >> https://developer.amazon.com/de-DE/docs/alexa/smapi/voice-permissions-for-reminders.html
 */
@@ -19,10 +28,10 @@ if ($ALEXA->verified($post, $rawpost, $RemindmeAPPId)){
 	$timelimit=[3600*4, 3600*24]; // min, max
 	
 	$answers = [
-		'reminder_from' => ['de' => 'Taschentuchknoten erinnert: ',
-						'en' => 'Hankerchief knot reminds: '],
-		'start' => [	'de' => 'lass dich vom handtuchknoten regelmäßig erinnern. frage zum beispiel "was sind meine erinnerungen" oder erstelle eine neue. frage nach hilfe, wenn du nicht weiter weißt. ',
-						'en' => 'let the hankerchief knot remind you regulary. ask for instance "what are my reminders" or set up a new one. ask for help if you get stuck. '],
+		'reminder_from' => ['de' => 'Vergissmeinnicht erinnert: ',
+						'en' => 'forgetmenot reminds: '],
+		'start' => [	'de' => 'lass dich vom vergiss-mein-nicht regelmäßig erinnern. frage zum beispiel "was sind meine erinnerungen" oder erstelle eine neue. frage nach hilfe, wenn du nicht weiter weißt. ',
+						'en' => 'let the forget-me-not remind you regulary. ask for instance "what are my reminders" or set up a new one. ask for help if you get stuck. '],
 		'welcomeback' => ['de' => 'willkommen zurück! ',
 						'en' => 'welcome back! '],
 		'reminder_permission' => ['de' => 'Für die Erinnerungen ist deine Freigabe erforderlich.',
@@ -37,8 +46,8 @@ if ($ALEXA->verified($post, $rawpost, $RemindmeAPPId)){
 						'en' => 'an error occured. this device might not support reminders.'],
 		'errortimelimit' => ['de' => 'tut mir leid, amazon erlaubt keine kürzeren intervalle als 4 oder längere als 24 stunden.',
 						'en' => 'i am sorry, amazon does not allow intervals less than 4 or more than 24 hours.'],
-		'no_reminders' => ['de' => 'du hast keine aktiven erinnerungen',
-						'en' => 'there are no active reminders'],
+		'no_reminders' => ['de' => 'du hast keine aktiven erinnerungen. was kann ich für dich tun?',
+						'en' => 'there are no active reminders. what can i do for you?'],
 		'unset_reprompt' => ['de' => 'soll ich eine erinnerung beenden?',
 						'en' => 'shall i cancel a reminder?'],
 		'conjunction' => ['de' => 'und',
@@ -63,7 +72,8 @@ if ($ALEXA->verified($post, $rawpost, $RemindmeAPPId)){
 								."Um eine Übersicht über deine Erinnerungen zu erhalten sage: \"Was sind meine Erinnerungen\".\r\n"
 								."Löschen kannst du, indem du sagst: \"Beende Erinnerung an {was auch immer}\".\r\n \r\n"
 								."Du musst in deiner Alexa-App die Berechtigung für die Erinnerungsfunktion erteilen. "
-								."Aktuell haben die wiederkehrenden Erinnerungen eine Laufzeit von einem Jahr.",
+								."Aktuell haben die wiederkehrenden Erinnerungen eine Laufzeit von einem Jahr. "
+								."Wenn der Tag nicht gleichmäßig in deine Abstände eingeteilt werden kann, ist es über Mitternacht etwas ungenau.",
 						'en' => "This skill reminds you regulary.\r\n"
 								."Currently the skill supports repetitive reminders within a day. "
 								."You can remind yourself to \"drink\", \"relax\" or your \"short workout\" this way. "
@@ -72,7 +82,8 @@ if ($ALEXA->verified($post, $rawpost, $RemindmeAPPId)){
 								."To get an overview of current reminders say: \"what are my reminders\".\r\n"
 								."Delete reminders by saying: \"stop reminding me of {whatever}\".\r\n \r\n"
 								."You have to give the permission for reminders within the Alexa-app. "
-								."Currently the reccuring reminders have a lifetime of one year."],
+								."Currently the reccuring reminders have a lifetime of one year. "
+								."If the day can not be parted evenly by your intervals it gets a bit fuzzy around midnight."],
 	];
 	
 	if ($post->request->type == "LaunchRequest" || $IntentName == "unset"){
@@ -161,13 +172,13 @@ if ($ALEXA->verified($post, $rawpost, $RemindmeAPPId)){
 		
 		if (key_exists($topic_with_from, $activereminders)) $ALEXA->deletereminder($AccessToken,$activereminders[$topic_with_from]['id']);
 		
-		$set= $ALEXA->setrecurringreminder($post, ['interval' => $interval, 'text' => $topic_with_from, 'duration' => 3600*24*365], $post->request->timestamp);
+		$set= $ALEXA->setrecurringreminder($post, ['interval' => $interval, 'text' => $topic, 'ssml'=> '<speak>' . $topic_with_from . '</speak>', 'duration' => 3600*24*365], $post->request->timestamp);
 		if (!strstr($set[0], '1.1 201')){
 			$say = $answers['errornotsupported'][$lang];
 		}
 		else {
-			$answers['set_time'] = ['de' => 'ok, ich erinnere dich alle ' . $intervalsay . ' an ' . $topic,
-									'en' => 'ok, i try to remind you every ' . $intervalsay . ' to ' . $topic];
+			$answers['set_time'] = ['de' => 'ok, ich erinnere dich das nächste mal um ' . $ALEXA->tellTime($set[1], $lang) . ' an ' . $topic,
+									'en' => 'ok, the next time i remind you at ' . $ALEXA->tellTime($set[1], $lang) . ' to ' . $topic];
 			$say = $answers['set_time'][$lang];
 		}
 		$OUTPUT->speak = $say;
