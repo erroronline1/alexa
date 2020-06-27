@@ -117,22 +117,48 @@ class BasicFunctions{
 		if ($setting && $requesttime){
 			// note that amazon currently does not allow intervals less than 4 hours
 			$recurrenceRules = [];
-			$unixtime=strtotime($requesttime);
-			$date = new DateTime(strftime("%H%M%S", $unixtime));
-			for ($i = 0 ; $i < floor(24 * 3600 / $setting['interval']) ; $i++){
-				$date->add(new DateInterval('PT' . $setting['interval'] . 'S'));
-				array_push($recurrenceRules, 'FREQ=DAILY;BYHOUR=' . intval($date->format('H')) . ';BYMINUTE=' . intval($date->format('i')) . ';BYSECOND=' . intval($date->format('s')) . ';INTERVAL=1;');
+			$requesttime=strtotime($requesttime);
+			$rulesOutput=[];
+			$initial = new DateTime(strftime("%H%M%S", $requesttime));
+			$back = new DateTime(strftime("%H%M%S", $requesttime));
+			$forth = new DateTime(strftime("%H%M%S", $requesttime));
+			
+			// i consider this somehow ugly but it works and i can not think of a nicer solution. while the day number is the same
+			// timespans will be subtracted and added, ends up in a dispensable item in both directions that has so be sanitized.
+			// two dimensional array at first to determine the next reminder that the skill should provide according to certification
+			function recurcontent($date){return 'FREQ=DAILY;BYHOUR=' . intval($date->format('H')) . ';BYMINUTE=' . intval($date->format('i')) . ';BYSECOND=' . intval($date->format('s')) . ';INTERVAL=1;';}
+			//substract interval from requesttime
+			while ($initial->format('D') == $back->format('D')){
+				array_unshift($recurrenceRules, [recurcontent($back->sub(new DateInterval('PT' . $setting['interval'] . 'S'))), $back->getTimestamp()]);
 			}
+			//add current time
+			array_push($recurrenceRules, [recurcontent($initial), $initial->getTimestamp()]);
+			$nextreminder = false;
+			//add interval from requesttime
+			while ($initial->format('D') == $forth->format('D')){
+				array_push($recurrenceRules, [recurcontent($forth->add(new DateInterval('PT' . $setting['interval'] . 'S'))), $forth->getTimestamp()]);
+				if (!$nextreminder) $nextreminder = count($recurrenceRules);
+			}
+			//sanitize
+			$recurrenceRules=array_slice($recurrenceRules, 1, -1);
+			//determine next occurence
+			if ($nextreminder > count($recurrenceRules)) $nextreminder = $recurrenceRules[0][1];
+			else $nextreminder = $recurrenceRules[$nextreminder - 2][1];
+
+			foreach($recurrenceRules as $item){
+				array_push($rulesOutput, $item[0]);
+			}
+
 			$reminder = [
-				'requestTime'  => strftime("%Y-%m-%dT%H:%M:%S.000", $unixtime),
+				'requestTime'  => strftime("%Y-%m-%dT%H:%M:%S.000", $requesttime),
 				'trigger' => [
 						'type'  => 'SCHEDULED_ABSOLUTE',
-						'scheduledTime' => strftime('%Y-%m-%dT%H:%M:%S.000', $unixtime),
+						'scheduledTime' => strftime('%Y-%m-%dT%H:%M:%S.000', $requesttime),
 						//'timeZoneId' => 'America/Los_Angeles',
 						'recurrence' => [
-						  'startDateTime' => strftime('%Y-%m-%dT%H:%M:%S.000', $unixtime),
-						  'endDateTime' => strftime('%Y-%m-%dT%H:%M:%S.000', $unixtime + $setting['duration']),
-						  'recurrenceRules' => $recurrenceRules
+						  'startDateTime' => strftime('%Y-%m-%dT%H:%M:%S.000', $requesttime),
+						  'endDateTime' => strftime('%Y-%m-%dT%H:%M:%S.000', $requesttime + $setting['duration']),
+						  'recurrenceRules' => $rulesOutput
 						]
 					],
 					'alertInfo' => [
@@ -140,7 +166,7 @@ class BasicFunctions{
 							'content' => [[
 								'locale' => $post->request->locale, 
 								'text' => $setting['text'],
-								'ssml' => '<speak> ' . $setting['text'] . '</speak>'
+								'ssml' => $setting['ssml']
 							]]
 						]
 					],
@@ -156,8 +182,17 @@ class BasicFunctions{
 			$context = stream_context_create($opts);
 			$response = json_decode(file_get_contents('https://api.eu.amazonalexa.com/v1/alerts/reminders', false, $context));
 			// ran from the developer console results in an error 403, only via reminder-enabled devices have a 201 status //
-			return [$http_response_header[0], $json];
+			return [$http_response_header[0], $nextreminder, $json];
 		}
+	}
+
+	//some kind of <say-as time> for unix-timestamps
+	function tellTime($unixtime, $lang='de'){
+		$format=[
+			'de' => date("H \U\h\\r i", $unixtime),
+			'en' => date("H i", $unixtime)
+		];
+		return $format[$lang];
 	}
 
 	// returns ISO-8601 interval format (PnYnMnDTnHnMnS) resolved for speech and in seconds
