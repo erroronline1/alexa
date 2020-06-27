@@ -4,7 +4,7 @@
 {
 	"interactionModel": {
 		"languageModel": {
-			"invocationName": "forgetmenot",
+			"invocationName": "forget me not",
 			"modelConfiguration": {
 				"fallbackIntentSensitivity": {
 					"level": "LOW"
