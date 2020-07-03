@@ -3,16 +3,14 @@
 include ('nonpublic.php'); // application ids, database connections, etc.
 
 /*todo according to certification feedback
-Please note that we observed that the in the skill's response skill is telling the user that it will inform the user to drink every four hours but when we checked in the companion app the reminder was setted up for wrong timings
-(as example if we asked the skill to set up reminder to drink every four hours at 9 AM then skill must set up the reminder at 1 PM to remind us but here skill is setting up the reminder for 9:30 PM )
+Please note even after providing the reminders permissions the user is unable to create a reminders as the skill provides an above response.
 
-Please note that even after providing the permission for reminders, skill is again prompting the user to give the permission.Please note that for every intent the skill is responding same as above.Kindly provide the proper response and make the functionality proper so that the user can set up reminders and achieve the core.Kindly make the necessary changes.
+Note that the skill sets the first reminder in 4 hours, but does not set a recurrence, even though it says so. After the first reminder has delivered its notification, the reminder gets deleted.
 
-Note that the skill sets the first reminder in 5 hours, but does not set a recurrence, even though it says so. After the first reminder has delivered its notification, the reminder gets deleted.
+Please note when user ask the skill at 12 34 pm to set reminder for every four hours. The skill sets the reminder at 13 04 pm, where as the skill should ideally set the reminder for time 16 34 pm which is four hours after the user request time.
 
-The skill sets the reminder in five hours, but does not call out the time for which it sets the first reminder of the recurrence. Kindly make sure to inform the user when the first reminder will be set at the beginning of the recurrence.
 
-set up voice activated permission
+optional set up voice activated permission
 >> https://developer.amazon.com/de-DE/docs/alexa/smapi/voice-permissions-for-reminders.html
 */
 
@@ -34,10 +32,10 @@ if ($ALEXA->verified($post, $rawpost, $RemindmeAPPId)){
 						'en' => 'let the forget-me-not remind you regulary. ask for instance "what are my reminders" or set up a new one. ask for help if you get stuck. '],
 		'welcomeback' => ['de' => 'willkommen zurück! ',
 						'en' => 'welcome back! '],
-		'reminder_permission' => ['de' => 'Für die Erinnerungen ist deine Freigabe erforderlich.',
-						'en' => 'For reminders your permission is necessary.'],
-		'reminder_permission2' => ['de' => ' die freigabe für erinnerungen durch diesen skill solltest du vor der benutzung erteilen. dies kannst du jetzt in deiner alexa-app tun.',
-						'en' => ' the permission for reminders through this skill should be granted before use. you can do this now from the alexa-app.'],
+		'reminder_permission' => ['de' => 'Für die Erinnerungen von Vergissmeinnicht ist deine Freigabe erforderlich.',
+						'en' => 'For reminders by forget-me-not your permission is necessary.'],
+		'reminder_permission2' => ['de' => ' die freigabe für erinnerungen durch diesen skill solltest du vor der benutzung erteilen. dies kannst du jetzt in deiner alexa-app tun. starte anschließend den skill erneut.',
+						'en' => ' the permission for reminders through this skill should be granted before use. you can do this now from the alexa-app. afterwards restart the skill.'],
 		'set_topic_reprompt' => ['de' => 'in welchen abständen darf ich dich erinnern?',
 						'en' => 'in which intervals i should remind you?'],
 		'error' => [	'de' => 'es trat ein fehler auf, bitte versuche es nochmal',
@@ -115,9 +113,8 @@ if ($ALEXA->verified($post, $rawpost, $RemindmeAPPId)){
 				$OUTPUT->reprompt = $answers['unset_reprompt'][$lang];
 			}
 			else $OUTPUT->speak .= $answers['no_reminders'][$lang];
-
+			$OUTPUT->reprompt = $OUTPUT->reprompt ? : $answers['help'][$lang]; //learnt that a reprompt is expected on launch. the skill works otherwise but the console throws an error.
 		}
-		$OUTPUT->reprompt = $OUTPUT->reprompt ? : $answers['help'][$lang]; //learnt that a reprompt is expected on launch. the skill works otherwise but the console throws an error.
 	}
 	elseif ($IntentName == "AMAZON.HelpIntent"){
 		$OUTPUT->speak = $OUTPUT->reprompt = $answers['help'][$lang];
@@ -170,11 +167,13 @@ if ($ALEXA->verified($post, $rawpost, $RemindmeAPPId)){
 		$intervalsay = $post->session->attributes->INTERVALSAY;
 		$activereminders = $ALEXA->getactivereminders($AccessToken);
 		
-		if (key_exists($topic_with_from, $activereminders)) $ALEXA->deletereminder($AccessToken,$activereminders[$topic_with_from]['id']);
+		if (key_exists($topic, $activereminders)) $ALEXA->deletereminder($AccessToken,$activereminders[$topic]['id']);
 		
 		$set= $ALEXA->setrecurringreminder($post, ['interval' => $interval, 'text' => $topic, 'ssml'=> '<speak>' . $topic_with_from . '</speak>', 'duration' => 3600*24*365], $post->request->timestamp);
 		if (!strstr($set[0], '1.1 201')){
 			$say = $answers['errornotsupported'][$lang];
+			$OUTPUT->card->title = "error";
+			$OUTPUT->card->text = implode(' | ', $set);
 		}
 		else {
 			$answers['set_time'] = ['de' => 'ok, ich erinnere dich das nächste mal um ' . $ALEXA->tellTime($set[1], $lang) . ' an ' . $topic,
@@ -190,10 +189,9 @@ if ($ALEXA->verified($post, $rawpost, $RemindmeAPPId)){
 		}
 		else {
 			$topic = $post->request->intent->slots->topic->value;
-			$topic_with_from = $answers['reminder_from'][$lang].$topic;
 			$activereminders=$ALEXA->getactivereminders($AccessToken);
-			if (key_exists($topic_with_from, $activereminders)){
-				$ALEXA->deletereminder($AccessToken,$activereminders[$topic_with_from]['id']);
+			if (key_exists($topic, $activereminders)){
+				$ALEXA->deletereminder($AccessToken,$activereminders[$topic]['id']);
 				$answers['deleted'] = [	'de' => 'ich erinnere dich nun nicht mehr an ' . $topic,
 										'en' => 'i will not longer remind you of ' . $topic];
 			}
