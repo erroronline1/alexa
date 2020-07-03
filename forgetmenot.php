@@ -2,7 +2,7 @@
 
 include ('nonpublic.php'); // application ids, database connections, etc.
 
-/*todo according to certification feedback
+/*latest certification feedback
 Please note even after providing the reminders permissions the user is unable to create a reminders as the skill provides an above response.
 
 Note that the skill sets the first reminder in 4 hours, but does not set a recurrence, even though it says so. After the first reminder has delivered its notification, the reminder gets deleted.
@@ -21,7 +21,7 @@ if ($ALEXA->verified($post, $rawpost, $RemindmeAPPId)){
 	// $post->request->locale might be 'de_DE' or 'en_US' or something like that and can be used to determine language output
 	// since this shall support various english regions i concentrate on the language and not on the region
 	$lang = substr($post->request->locale, 0, 2);
-	// amazon does not allow recurring reminders less that 4 hours apart, and onyl dayly, weekly and monthly recurrances therefore
+	// amazon does not allow recurring reminders less that 4 hours apart, and only dayly, weekly and monthly recurrances therefore
 	// no intervals of e.g. 28 hours
 	$timelimit=[3600*4, 3600*24]; // min, max
 	
