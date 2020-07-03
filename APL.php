@@ -14,7 +14,7 @@ class BasicFunctions{
 
 */	function verified($post, $rawpost, $applicationId){
 	//verification as expected by amazon
-		$head=getallheaders();
+		$head = getallheaders();
 		$signature = openssl_x509_parse(file_get_contents($head['Signaturecertchainurl']));
 		openssl_public_decrypt(base64_decode($head['Signature']), $decryptedSignature, openssl_pkey_get_public(file_get_contents($head['Signaturecertchainurl'])));
 		return (
@@ -71,7 +71,7 @@ class BasicFunctions{
 */	function askforreminderpermission($title='Für deine Anfrage ist deine Freigabe erforderlich.'){
 		return [
 			'type' => 'AskForPermissionsConsent',
-			'title' =>$title,
+			'title' => $title,
 			'permissions' => [ "alexa::alerts:reminders:skill:readwrite" ]
 		];
 	}
@@ -95,7 +95,7 @@ class BasicFunctions{
 		$reminders = json_decode(file_get_contents('https://api.eu.amazonalexa.com/v1/alerts/reminders', false, $context));
 			
 		if (!strstr($http_response_header[0], '1.1 200')) return false;
-		$return=[0];
+		$return = [0];
 		foreach($reminders->alerts as $item => $reminder){
 			if ($reminder->status == "ON") {
 				$return[$reminder->alertInfo->spokenInfo->content[0]->text] = [
@@ -117,8 +117,8 @@ class BasicFunctions{
 		if ($setting && $requesttime){
 			// note that amazon currently does not allow intervals less than 4 hours
 			$recurrenceRules = [];
-			$requesttime=strtotime($requesttime);
-			$rulesOutput=[];
+			$requesttime = strtotime($requesttime);
+			$rulesOutput = [];
 			$initial = new DateTime(strftime("%H%M%S", $requesttime));
 			$back = new DateTime(strftime("%H%M%S", $requesttime));
 			$forth = new DateTime(strftime("%H%M%S", $requesttime));
@@ -150,9 +150,9 @@ class BasicFunctions{
 			}
 
 			$reminder = [
-				'requestTime'  => strftime("%Y-%m-%dT%H:%M:%S.000", $requesttime),
+				'requestTime' => strftime("%Y-%m-%dT%H:%M:%S.000", $requesttime),
 				'trigger' => [
-						'type'  => 'SCHEDULED_ABSOLUTE',
+						'type' => 'SCHEDULED_ABSOLUTE',
 						'scheduledTime' => strftime('%Y-%m-%dT%H:%M:%S.000', $requesttime),
 						//'timeZoneId' => 'America/Los_Angeles',
 						'recurrence' => [
@@ -175,7 +175,7 @@ class BasicFunctions{
 					]
 			];
 			// Create a stream
-			$json=stripslashes(json_encode($reminder));
+			$json = stripslashes(json_encode($reminder));
 			$opts = [ 'http' => [	'method' => 'POST',
 									'header' => "Content-length: " . strlen($json) . "\r\nAuthorization: Bearer " . $post->context->System->apiAccessToken . "\r\nContent-Type: application/json\r\n",
 									'content' => $json] ];
@@ -188,16 +188,18 @@ class BasicFunctions{
 
 	//some kind of <say-as time> for unix-timestamps
 	function tellTime($unixtime, $lang='de'){
-		$format=[
-			'de' => date("H \U\h\\r i", $unixtime),
-			'en' => date("H i", $unixtime)
+		$hour = date("G", $unixtime);
+		$minute = intval(date("i", $unixtime));
+		$format = [
+			'de' => $hour . " Uhr " . $minute,
+			'en' => $hour . ($minute < 10 ? ' o '. $minute : $minute)
 		];
 		return $format[$lang];
 	}
 
 	// returns ISO-8601 interval format (PnYnMnDTnHnMnS) resolved for speech and in seconds
-	function resolveInterval($interval, $lang='de'){
-		$t=[
+	function resolveInterval($interval, $lang = 'de'){
+		$t = [
 			'fullmatch' => [],
 			'PY' => ['de' => ['Jahr', 'Jahre'], 'en' => ['year', 'years'], 'sec' => 3600*24*365],
 			'PM' => ['de' => ['Monat', 'Monate'], 'en' => ['month', 'months'], 'sec' => 3600*24*30],
@@ -360,7 +362,7 @@ class OutputFunctions{
 						]
 				],
 				'customHint' => [
-					'values' =>[
+					'values' => [
 						'color' => '#000000',
 						'fontFamily' => 'Bookerly',
 						'fontStyle' => 'italic',
