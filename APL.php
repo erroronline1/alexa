@@ -1,18 +1,36 @@
 <?php
-//decode amazon query
-$rawpost=$post = file_get_contents('php://input');
-$post = json_decode($post);
-
 class BasicFunctions{
-// i decided to implement this as an singelton because i consider the function-request more readable
-	
+/*
+ ___  ___  _ _     _ _  ___  ___  ___
+| -_||   || | |   | | || .'||  _||_ -|
+|___||_|_| \_/     \_/ |__,||_|  |___|
+
+*/
+
+	public $rawpost;
+	public $post;
+	public $AccessToken;
+	public $IntentName;
+	public $apiEndpoint;
+	public $lang;
+
+	function __construct($rawpost){
+		$this->rawpost = $rawpost;
+		//decode amazon query
+		$this->post = json_decode($rawpost);
+		//shortcut to typical session parameters
+		$this->AccessToken = $this->post->context->System->apiAccessToken;
+		$this->IntentName = $this->post->request->intent->name;
+		$this->apiEndpoint = $this->post->context->System->apiEndpoint;
+	}
+
 /*
                 _  ___  _            _    _
  _ _  ___  ___ |_||  _||_| ___  ___ | |_ |_| ___  ___
 | | || -_||  _|| ||  _|| ||  _|| .'||  _|| || . ||   |
  \_/ |___||_|  |_||_|  |_||___||__,||_|  |_||___||_|_|
 
-*/	function verified($post, $rawpost, $applicationId){
+*/	function verified($applicationId){
 	//verification as expected by amazon
 		$head = getallheaders();
 		$signature = openssl_x509_parse(file_get_contents($head['Signaturecertchainurl']));
@@ -22,14 +40,14 @@ class BasicFunctions{
 				preg_match("/https:\/\/s3.amazonaws.com(?:\:443){0,1}\/echo.api\/(?:..\/){0,1}echo-api-cert(?:.*?).pem/", $head['Signaturecertchainurl'])
 			) &&
 			( //verify Signature
-				$signature['validFrom_time_t'] < time() && time() < $signature['validTo_time_t'] && stristr($signature['subject']['CN'], 'echo-api.amazon.com') && substr(bin2hex($decryptedSignature), 30) === sha1($rawpost)
+				$signature['validFrom_time_t'] < time() && time() < $signature['validTo_time_t'] && stristr($signature['subject']['CN'], 'echo-api.amazon.com') && substr(bin2hex($decryptedSignature), 30) === sha1($this->rawpost)
 			) &&
 			( // verify timestamp of request
-				strtotime($post->request->timestamp) >= time()-150
+				strtotime($this->post->request->timestamp) >= time()-150
 			) &&   
 			( // verify application id - can be string or array (for example submission id and developer id)
-				$post->session->application->applicationId == $applicationId
-				|| in_array($post->session->application->applicationId, $applicationId)			
+				$this->post->session->application->applicationId == $applicationId
+				|| in_array($this->post->session->application->applicationId, $applicationId)			
 			)
 		);
 	} 
@@ -52,14 +70,13 @@ class BasicFunctions{
 		'permissions' => [ "alexa::profile:email:read" ]
 		];
 	}
-	function getemail($token){
+	function getemail(){
 		// Create a stream
 		$opts = [ 'http' => [	'method' => 'GET',
-								'header' => "Accept: application/json\r\nAuthorization: Bearer " . $token . "\r\n"] ];
+								'header' => "Accept: application/json\r\nAuthorization: Bearer " . $this->AccessToken . "\r\n"] ];
 		$context = stream_context_create($opts);
 		// Open the file using the HTTP headers set above
-		///////////// CAUTION! INSANITY AHEAD: ENDPOINT api.eu.amazonalexa.com WITH .eu ///////////////////////////
-		return json_decode(file_get_contents('https://api.eu.amazonalexa.com/v2/accounts/~current/settings/Profile.email', false, $context));
+		return json_decode(file_get_contents($this->apiEndpoint . '/v2/accounts/~current/settings/Profile.email', false, $context));
 	}
 	
 /*
@@ -87,12 +104,15 @@ class BasicFunctions{
 			'token' => ''
 		];
 	}
-	function getactivereminders($token){
+	function reminderconsent(){
+		return $this->post->context->System->user->permissions->consentToken || false;
+	}
+	function getactivereminders(){
 		// Create a stream
 		$opts = [ 'http' => [	'method' => 'GET',
-								'header' => "Accept: application/json\r\nAuthorization: Bearer " . $token . "\r\n"] ];
+								'header' => "Accept: application/json\r\nAuthorization: Bearer " . $this->AccessToken . "\r\n"] ];
 		$context = stream_context_create($opts);
-		$reminders = json_decode(file_get_contents('https://api.eu.amazonalexa.com/v1/alerts/reminders', false, $context));
+		$reminders = json_decode(file_get_contents($this->apiEndpoint . '/v1/alerts/reminders', false, $context));
 			
 		if (!strstr($http_response_header[0], '1.1 200')) return false;
 		$return = [0];
@@ -105,15 +125,15 @@ class BasicFunctions{
 		}
 		return $return;
 	}
-	function deletereminder($token, $id){
+	function deletereminder($id){
 		// Create a stream
 		$opts = [ 'http' => [	'method' => 'DELETE',
-								'header' => "Accept: application/json\r\nAuthorization: Bearer " . $token . "\r\n"] ];
+								'header' => "Accept: application/json\r\nAuthorization: Bearer " . $this->AccessToken . "\r\n"] ];
 		$context = stream_context_create($opts);
-		$return = json_decode(file_get_contents('https://api.eu.amazonalexa.com/v1/alerts/reminders/' . $id, false, $context));
+		$return = json_decode(file_get_contents($this->apiEndpoint . '/v1/alerts/reminders/' . $id, false, $context));
 		return $http_response_header;
 	}
-	function setrecurringreminder($post, $setting, $requesttime){
+	function setrecurringreminder($setting, $requesttime){
 		if ($setting && $requesttime){
 			// note that amazon currently does not allow intervals less than 4 hours
 			$recurrenceRules = [];
@@ -164,7 +184,7 @@ class BasicFunctions{
 					'alertInfo' => [
 						'spokenInfo' => [
 							'content' => [[
-								'locale' => $post->request->locale, 
+								'locale' => $this->post->request->locale, 
 								'text' => $setting['text'],
 								'ssml' => $setting['ssml']
 							]]
@@ -177,10 +197,10 @@ class BasicFunctions{
 			// Create a stream
 			$json = stripslashes(json_encode($reminder));
 			$opts = [ 'http' => [	'method' => 'POST',
-									'header' => "Content-length: " . strlen($json) . "\r\nAuthorization: Bearer " . $post->context->System->apiAccessToken . "\r\nContent-Type: application/json\r\n",
+									'header' => "Content-length: " . strlen($json) . "\r\nAuthorization: Bearer " . $this->post->context->System->apiAccessToken . "\r\nContent-Type: application/json\r\n",
 									'content' => $json] ];
 			$context = stream_context_create($opts);
-			$response = json_decode(file_get_contents('https://api.eu.amazonalexa.com/v1/alerts/reminders', false, $context));
+			$response = json_decode(file_get_contents($this->apiEndpoint . '/v1/alerts/reminders', false, $context));
 			// ran from the developer console results in an error 403, only via reminder-enabled devices have a 201 status //
 			return [$http_response_header[0], $nextreminder, $json];
 		}
@@ -235,7 +255,10 @@ class BasicFunctions{
 }
 
 class OutputFunctions{
-	// create final processed output
+	function __construct($post, $AccessToken){
+		$this->post = $post;
+		$this->AccessToken = $AccessToken;
+	}
 
 	function debug($str, $where = "json"){
 		// might come in handy once in a while, shows debugging info in developer console
@@ -243,9 +266,7 @@ class OutputFunctions{
 	}
 		
 	function answer(){
-		global $AccessToken;
 		global $debugger;
-		global $post;
 
 /*
                           _
@@ -297,7 +318,7 @@ class OutputFunctions{
                          |_|        |___|
 
 */		// support for non APL enabled deviced
-		if ($post->context->System->device->supportedInterfaces->Display && !$post->context->System->device->supportedInterfaces->Alexa.Presentation.APL && $this->display) $responseArray['response']['directives']=[
+		if ($this->post->context->System->device->supportedInterfaces->Display && !$this->post->context->System->device->supportedInterfaces->Alexa.Presentation.APL && $this->display) $responseArray['response']['directives']=[
 			[
 				'type' => "Display.RenderTemplate",
 				'template' => [
@@ -336,7 +357,7 @@ class OutputFunctions{
      |_|        |___|
 
 */		//support for APL enabled devices
-		if ($post->context->System->device->supportedInterfaces->Display && $post->context->System->device->supportedInterfaces->Alexa.Presentation.APL && $this->display) {
+		if ($this->post->context->System->device->supportedInterfaces->Display && $this->post->context->System->device->supportedInterfaces->Alexa.Presentation.APL && $this->display) {
 			
 			$styles = $this->display->styles != null ? $this->display->styles : [
 				'textStylePrimary' => [
@@ -772,22 +793,16 @@ class OutputFunctions{
 		if ($this->sessionAttributes) $responseArray['sessionAttributes']=$this->sessionAttributes;
 		
 		if ($debugger){ // dev-mode mysqli_connect-object for logging in- and output
-			global $post;
-			$debugger->query("INSERT INTO json_log VALUES ('',CURRENT_TIMESTAMP,'" . json_encode($post) . "','" . json_encode($responseArray) . "')");
+			$debugger->query("INSERT INTO json_log VALUES ('',CURRENT_TIMESTAMP,'" . json_encode($this->post) . "','" . json_encode($responseArray) . "')");
 		}
 
-		header('Content-Type: application/json; Content-Length:' . strlen(json_encode($responseArray)) . '; Authorisation: Bearer ' . $AccessToken . '; Access-Control-Allow-Origin: *; Access-Control-Allow-Methods: GET');
+		header('Content-Type: application/json; Content-Length:' . strlen(json_encode($responseArray)) . '; Authorisation: Bearer ' . $this->AccessToken . '; Access-Control-Allow-Origin: *; Access-Control-Allow-Methods: GET');
 		echo json_encode($responseArray);
 	}
 }
 
-$ALEXA = new BasicFunctions(); //initialize basic functions - you don´t say!
-$OUTPUT = new OutputFunctions(); //initialize output functions - you don´t say!
+$ALEXA = new BasicFunctions(file_get_contents('php://input')); //initialize basic functions
+$OUTPUT = new OutputFunctions($ALEXA->post, $ALEXA->AccessToken); //initialize output functions
 
 $OUTPUT->speak = "was kann ich für dich tun?"; // in case i forgot to initialize the variable
-
-//given parameters simplyfied (usual suspects)
-$AccessToken = $post->context->System->apiAccessToken;
-$IntentName = $post->request->intent->name;
-
 ?>
