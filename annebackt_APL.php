@@ -2,12 +2,12 @@
 
 include ('nonpublic.php'); // application ids, database connections, etc.
 
-if ($ALEXA->verified($post, $rawpost, $AnneBacktAppId)){
+if ($ALEXA->verified($AnneBacktAppId)){
 
 //read slots
-$num = $post->request->intent->slots->NUM->value;
-$contains = $post->request->intent->slots->CONTAINS->value;
-$receiptnumber = $post->request->intent->slots->RECEIPT_NUMBER->value;
+$num = $ALEXA->post->request->intent->slots->NUM->value;
+$contains = $ALEXA->post->request->intent->slots->CONTAINS->value;
+$receiptnumber = $ALEXA->post->request->intent->slots->RECEIPT_NUMBER->value;
 
 
 include('../../asb/backend/project.library.php');
@@ -50,40 +50,40 @@ $stardardText='Frag:<br />"Was gibt es neues?"<br />'
 
 //sort of translate event from touch to invocation
 //currently for touch selection of list element only
-if ($post->request->source->type =='TouchWrapper'){
+if ($ALEXA->post->request->source->type =='TouchWrapper'){
 
-	$post->request->type = "IntentRequest";
-	$IntentName = 'SELECT_RECEIPT';
-	$receiptnumber = $post->request->arguments[0];
-	$post->session->attributes->SelectableReceipts = $post->request->arguments[1];
+	$ALEXA->post->request->type = "IntentRequest";
+	$ALEXA->IntentName = 'SELECT_RECEIPT';
+	$receiptnumber = $ALEXA->post->request->arguments[0];
+	$ALEXA->post->session->attributes->SelectableReceipts = $ALEXA->post->request->arguments[1];
 }
 
 
-if ($post->request->type == "LaunchRequest"){
+if ($ALEXA->post->request->type == "LaunchRequest"){
 	$OUTPUT->speak = 'willkommen bei anne backt. was kann ich für dich tun?';
 	$OUTPUT->reprompt = 'wenn du nicht weiter weißt frag nach hilfe.';
 	$OUTPUT->display->title = 'Willkommen bei Anne backt';
 	$OUTPUT->display->text = $stardardText;
 	$OUTPUT->display->hint = 'versuche "was gibt es neues?"';
 }
-elseif ($post->request->type == 'SessionEndedRequest') {
+elseif ($ALEXA->post->request->type == 'SessionEndedRequest') {
 	$OUTPUT->speak = 'dann bis bald. ich hoffe ich konnte helfen.';
 }
-elseif ($post->request->type == "IntentRequest"){
-	if ($IntentName == "DEFAULT" || $IntentName == "AMAZON.FallbackIntent"){
+elseif ($ALEXA->post->request->type == "IntentRequest"){
+	if ($ALEXA->IntentName == "DEFAULT" || $ALEXA->IntentName == "AMAZON.FallbackIntent"){
 		$OUTPUT->speak = 'was kann ich für dich tun?';
 		$OUTPUT->reprompt = $ALEXA->interject('hey').'! wenn du nicht weiter weißt, frag nach hilfe.';
 	}
-	elseif ($IntentName == "NEW_RECEIPTS" || $IntentName == "NEW_RECEIPT" || $IntentName == "SURPRISE"){
-		if ($IntentName == "NEW_RECEIPTS") $orderlimit = 'ORDER BY timestamp DESC LIMIT ' . ($num?:3);
-		elseif ($IntentName == "NEW_RECEIPT") $orderlimit = 'ORDER BY timestamp DESC LIMIT 1';
-		elseif ($IntentName == "SURPRISE") $orderlimit = 'ORDER BY RAND() LIMIT 1';
+	elseif ($ALEXA->IntentName == "NEW_RECEIPTS" || $ALEXA->IntentName == "NEW_RECEIPT" || $ALEXA->IntentName == "SURPRISE"){
+		if ($ALEXA->IntentName == "NEW_RECEIPTS") $orderlimit = 'ORDER BY timestamp DESC LIMIT ' . ($num?:3);
+		elseif ($ALEXA->IntentName == "NEW_RECEIPT") $orderlimit = 'ORDER BY timestamp DESC LIMIT 1';
+		elseif ($ALEXA->IntentName == "SURPRISE") $orderlimit = 'ORDER BY RAND() LIMIT 1';
 		$list=$mysqli->query("SELECT * FROM content WHERE timestamp<=UNIX_TIMESTAMP() " . $orderlimit);
 		if ($list->num_rows > 0) {
 			if ($list->num_rows > 1) $OUTPUT->speak = 'Die neuesten '.$list->num_rows.' Rezepte sind:';
 			else {
-				if ($IntentName == "NEW_RECEIPT") $OUTPUT->speak = 'Das neueste Rezept ist:';
-				elseif ($IntentName == "SURPRISE") $OUTPUT->speak = 'wie wäre es mit:';
+				if ($ALEXA->IntentName == "NEW_RECEIPT") $OUTPUT->speak = 'Das neueste Rezept ist:';
+				elseif ($ALEXA->IntentName == "SURPRISE") $OUTPUT->speak = 'wie wäre es mit:';
 			}
 			$t_display['title'] = $OUTPUT->speak;
 			while($entry = $list->fetch_assoc()){
@@ -120,12 +120,12 @@ elseif ($post->request->type == "IntentRequest"){
 		}
 		else $OUTPUT->speak = 'leider konnte ich keine neuen rezepte finden';
 	}
-	elseif ($IntentName == "LOOKUP_RECEIPTS" || $IntentName == "LOOKUP_RECEIPTS_BY_TITLE"){
+	elseif ($ALEXA->IntentName == "LOOKUP_RECEIPTS" || $ALEXA->IntentName == "LOOKUP_RECEIPTS_BY_TITLE"){
 		if ($contains){
-			$column = $IntentName == 'LOOKUP_RECEIPTS' ? 'text' : 'titel';
+			$column = $ALEXA->IntentName == 'LOOKUP_RECEIPTS' ? 'text' : 'titel';
 			$list=$mysqli->query("SELECT * FROM content WHERE " . $column . " LIKE '%" . $contains . "%' AND timestamp<=UNIX_TIMESTAMP() ORDER BY timestamp DESC");
 			if ($list->num_rows) {
-				$OUTPUT->speak = $IntentName == 'LOOKUP_RECEIPTS'?
+				$OUTPUT->speak = $ALEXA->IntentName == 'LOOKUP_RECEIPTS'?
 						'Es gibt ' . $list->num_rows . ' Rezepte mit ' . ucfirst($contains) . ': ':
 						'Es gibt ' . $list->num_rows . ' Rezepte für ' . ucfirst($contains) . ': ';
 
@@ -172,10 +172,10 @@ elseif ($post->request->type == "IntentRequest"){
 			$OUTPUT->reprompt = 'ich habe deinen rezeptwunsch nicht verstanden. frag nochmal oder einfach nach den neuesten rezepten.';
 		}
 	}
-	elseif ($IntentName == "SELECT_RECEIPT" || ($IntentName == "AMAZON.YesIntent" && $post->session->attributes->YesIntentConfirms == "showreceipt")){
+	elseif ($ALEXA->IntentName == "SELECT_RECEIPT" || ($ALEXA->IntentName == "AMAZON.YesIntent" && $ALEXA->post->session->attributes->YesIntentConfirms == "showreceipt")){
 		$receiptnumber = $receiptnumber ? : 1;
-		if ($receiptnumber && $post->session->attributes->SelectableReceipts){
-			$which = explode(",", $post->session->attributes->SelectableReceipts);
+		if ($receiptnumber && $ALEXA->post->session->attributes->SelectableReceipts){
+			$which = explode(",", $ALEXA->post->session->attributes->SelectableReceipts);
 			if ($receiptnumber > 0 && $receiptnumber - 1 <= count($which)) {
 				$article = getArticle($which[$receiptnumber-1]);
 
@@ -191,16 +191,16 @@ elseif ($post->request->type == "IntentRequest"){
 				$OUTPUT->card->title = $OUTPUT->display->title = 'Na hör mal! ';
 				$OUTPUT->speak = 'das funktioniert so nicht. du kannst dir ' . (count($which) > 1 ? 'rezepte 1 bis ' . count($which) . ' anzeigen lassen.' : ' rezept nummer 1 anzeigen lassen oder die auswahl mit ' . $ALEXA->emphase('jaa') . ' bestätigen.');
 				$OUTPUT->display->hint = 'sage zum Beispiel "zeige Rezept Nummer ' . random_int(1, count($which)) . '"';
-				$OUTPUT->sessionAttributes = ['SelectableReceipts' => $post->session->attributes->SelectableReceipts, 'YesIntentConfirms' => 'showreceipt'];
+				$OUTPUT->sessionAttributes = ['SelectableReceipts' => $ALEXA->post->session->attributes->SelectableReceipts, 'YesIntentConfirms' => 'showreceipt'];
 			}
 			$OUTPUT->reprompt = 'kann ich sonst noch etwas für dich tun?';
 		}
 		else $OUTPUT->speak = 'ich habe dich leider nicht verstanden.' ;
 	}
-	elseif ($IntentName == "SEND_RECEIPT" || ($IntentName == "AMAZON.YesIntent" && $post->session->attributes->YesIntentConfirms == "sendreceipt")){
+	elseif ($ALEXA->IntentName == "SEND_RECEIPT" || ($ALEXA->IntentName == "AMAZON.YesIntent" && $ALEXA->post->session->attributes->YesIntentConfirms == "sendreceipt")){
 		$receiptnumber = $receiptnumber ? : 1;
-		if ($receiptnumber && $post->session->attributes->SelectableReceipts){
-			$which = explode(",", $post->session->attributes->SelectableReceipts);
+		if ($receiptnumber && $ALEXA->post->session->attributes->SelectableReceipts){
+			$which = explode(",", $ALEXA->post->session->attributes->SelectableReceipts);
 			$article = getArticle($which[$receiptnumber-1]);
 			$OUTPUT->card->title = $OUTPUT->display->title = 'Rezept für ' . $article['title'];
 			$OUTPUT->card->image = $OUTPUT->display->image = $article['image'];
@@ -212,7 +212,7 @@ elseif ($post->request->type == "IntentRequest"){
 			$receiptfound=false;
 		}
 
-		$usermail = $ALEXA->getemail($AccessToken);
+		$usermail = $ALEXA->getemail();
 		if (!is_string($usermail) || $usermail == 'null') {
 			$OUTPUT->speak = 'um dir das rezept per email zusenden zu können musst du für diesen skill in der alexa-app die freigabe zur verwendung deiner emailadresse erlauben. soll ich dir bis dahin weitere rezepte anzeigen?';
 			$OUTPUT->permission = $ALEXA->askforemailpermission('Möchtest du Rezept-Links per eMail erhalten?');
@@ -231,9 +231,9 @@ elseif ($post->request->type == "IntentRequest"){
 			$OUTPUT->reprompt = 'möchtest du noch andere rezepte angezeigt oder zugeschickt bekommen?';
 		}
 	}
-	elseif ($IntentName == "SECRET"){
-		if ($post->request->intent->slots->TRICK->value){
-			$OUTPUT->speak = $ALEXA->whisper('ich habe gar kein ' . $post->request->intent->slots->TRICK->value . '.') . ' ich backe ein bisschen liebe mit ein und lasse dem teig nur die zeit die er braucht. jetzt bist ' . $ALEXA->phoneme('du','\'duu') . ' dran! frag nach einem rezept und probiere es aus!';
+	elseif ($ALEXA->IntentName == "SECRET"){
+		if ($ALEXA->post->request->intent->slots->TRICK->value){
+			$OUTPUT->speak = $ALEXA->whisper('ich habe gar kein ' . $ALEXA->post->request->intent->slots->TRICK->value . '.') . ' ich backe ein bisschen liebe mit ein und lasse dem teig nur die zeit die er braucht. jetzt bist ' . $ALEXA->phoneme('du','\'duu') . ' dran! frag nach einem rezept und probiere es aus!';
 			$OUTPUT->reprompt = 'du kannst das bestimmt auch. frag mich einfach nach meinen rezepten und probier eines aus. also?';
 		}
 		else {
@@ -242,11 +242,11 @@ elseif ($post->request->type == "IntentRequest"){
 
 		}
 	}
-	elseif ($IntentName == "CRITICISE"){
+	elseif ($ALEXA->IntentName == "CRITICISE"){
 		$OUTPUT->speak = $ALEXA->interject('ey') . '! wenn du vorschläge hast was anne backt noch können soll schreib mir eine email. meine kontaktdaten findest du auf annebackt.de.';
 		//$OUTPUT->reprompt='meine kontaktdaten findest du auf annebackt.de.';
 	}
-	elseif ($IntentName == "AMAZON.HelpIntent"){
+	elseif ($ALEXA->IntentName == "AMAZON.HelpIntent"){
 		$OUTPUT->speak = 'dies ist ein skill der seite annebackt.de. stelle fragen wie: was sind die neuesten rezepte oder gibt es rezepte mit hefewasser - wobei hefewasser hier eine beliebige zutat ist. mehr optionen werden dir in der alexa-app angezeigt. versuchs mal!';
         $OUTPUT->card->title = 'Was kann der Annebackt.de-Skill?';
         $OUTPUT->card->image = "https://erroronline.one/column4/sslmedia.php?../../asb/design/icon192x192.png";
@@ -270,16 +270,16 @@ elseif ($post->request->type == "IntentRequest"){
 			.'</font>';
 		$OUTPUT->reprompt = 'versuchs mal! frag mich nach dem neuesten rezept!';
 	}
-	elseif ($IntentName == "AMAZON.StopIntent"){
+	elseif ($ALEXA->IntentName == "AMAZON.StopIntent"){
 		$OUTPUT->speak = 'ich hoffe ich konnte helfen.';
 		$OUTPUT->display->hint = 'bis bald...';
 	}
-	elseif ($IntentName == "AMAZON.CancelIntent" || $post->session->attributes->previousCancel) {
+	elseif ($ALEXA->IntentName == "AMAZON.CancelIntent" || $ALEXA->post->session->attributes->previousCancel) {
 		$OUTPUT->speak = 'ok! viel spaß beim backen!';
 		$OUTPUT->display->hint = 'bis bald...';
 	}
-	elseif ($IntentName == "NO_INTENT" || ($post->session->attributes->UnusedConfirmation && $IntentName == "AMAZON.YesIntent")){
-		if ($post->session->attributes->UnusedConfirmation && $IntentName == "AMAZON.YesIntent"){
+	elseif ($ALEXA->IntentName == "NO_INTENT" || ($ALEXA->post->session->attributes->UnusedConfirmation && $ALEXA->IntentName == "AMAZON.YesIntent")){
+		if ($ALEXA->post->session->attributes->UnusedConfirmation && $ALEXA->IntentName == "AMAZON.YesIntent"){
 			$OUTPUT->speak = 'dann frag mich! oder nach hilfe.';
 			$OUTPUT->display->text = $stardardText;
 			$OUTPUT->reprompt = 'was kann ich für dich tun?';
@@ -291,7 +291,7 @@ elseif ($post->request->type == "IntentRequest"){
 			$OUTPUT->sessionAttributes = ['previousCancel' => true];
 		}
 	}
-	elseif ($IntentName == "DEVELOPER"){
+	elseif ($ALEXA->IntentName == "DEVELOPER"){
 		$OUTPUT->speak = 'das hier ist der entwicklerbereich der zeitweise informationen bereitstellt. hier ist aber gerade nichts los.';
 		$OUTPUT->reprompt = 'kann ich etwas anderes für dich tun?';
 		$OUTPUT->sessionAttributes = ['previousCancel' => true];
@@ -304,7 +304,7 @@ elseif ($post->request->type == "IntentRequest"){
 						
 		$OUTPUT->card->image = $OUTPUT->display->image = $randcat->src->medium; //"https://erroronline.one/column4/sslmedia.php?../../asb/design/icon192x192.png";
 		$OUTPUT->card->text = $OUTPUT->display->text = "Hier, ein Bild von einer Katze...";
-		$OUTPUT->card->subtext = $OUTPUT->display->subtext = "(von " . $randcat->photographer . " via pexels.com)";
+		$OUTPUT->card->subtext = $OUTPUT->display->subtext = "(von " . $randcat->photographer . ")";
 	}
 }
 

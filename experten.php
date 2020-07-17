@@ -2,10 +2,10 @@
 
 include ('nonpublic.php'); // application ids, database connections, etc.
 
-if ($ALEXA->verified($post, $rawpost, $ExpertenAppId)){
+if ($ALEXA->verified($ExpertenAppId)){
 
 	//read slots
-	$lang=substr($post->request->locale,0,2);
+	$lang=substr($ALEXA->post->request->locale,0,2);
 
 	$experts=[	'de'=>['experten','spezialisten','fachleute','koryphäen'],
 				'en'=>['experts','specialists','professionals','pundits']];
@@ -26,11 +26,11 @@ if ($ALEXA->verified($post, $rawpost, $ExpertenAppId)){
 	// $post->request->locale might be 'de_DE' or 'en_US' or something like that and can be used to determine language output
 	// since this shall support various english regions i concentrate on the language and not on the region
 
-	if ($post->request->type=="LaunchRequest"){
+	if ($ALEXA->post->request->type=="LaunchRequest"){
 		$OUTPUT->speak=$answers[0][$lang];
 		$OUTPUT->reprompt=$answers[1][$lang]; //learnt that a reprompt is expected on launch. the skill works otherwise but the console throws an error.
 	}
-	elseif ($IntentName=="AMAZON.HelpIntent"){
+	elseif ($ALEXA->IntentName=="AMAZON.HelpIntent"){
 		$OUTPUT->speak=$OUTPUT->reprompt=$answers[1][$lang];
 	}
 	else $OUTPUT->speak=$answers[rand(2,count($answers)-1)][$lang];
