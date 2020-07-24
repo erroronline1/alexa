@@ -6,13 +6,11 @@ class BasicFunctions{
 |___||_|_| \_/     \_/ |__,||_|  |___|
 
 */
-
 	public $rawpost;
 	public $post;
 	public $AccessToken;
 	public $IntentName;
 	public $apiEndpoint;
-	public $lang;
 
 	function __construct($rawpost){
 		$this->rawpost = $rawpost;
@@ -161,9 +159,10 @@ class BasicFunctions{
 			}
 			//sanitize
 			$recurrenceRules=array_slice($recurrenceRules, 1, -1);
+			$nextreminder -= 2;
 			//determine next occurence
 			if ($nextreminder > count($recurrenceRules)) $nextreminder = $recurrenceRules[0][1];
-			else $nextreminder = $recurrenceRules[$nextreminder - 2][1];
+			else $nextreminder = $recurrenceRules[$nextreminder][1];
 
 			foreach($recurrenceRules as $item){
 				array_push($rulesOutput, $item[0]);
