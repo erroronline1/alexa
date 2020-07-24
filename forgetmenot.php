@@ -184,7 +184,6 @@ if ($ALEXA->verified($RemindmeAPPId)){
 		}
 		else {
 			$OUTPUT->speak = $answer2->get('confirm_time', $ALEXA->tellTime($set[1], $lang), $topic);
-			$OUTPUT->card->text = $set[1]. $set[2];
 		}
 	}
 	elseif ($ALEXA->IntentName == "unset_topic"){
