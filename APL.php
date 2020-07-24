@@ -159,7 +159,7 @@ class BasicFunctions{
 			}
 			//sanitize
 			$recurrenceRules=array_slice($recurrenceRules, 1, -1);
-			$nextreminder -= 2;
+			$nextreminder -= 1;
 			//determine next occurence
 			if ($nextreminder > count($recurrenceRules)) $nextreminder = $recurrenceRules[0][1];
 			else $nextreminder = $recurrenceRules[$nextreminder][1];
