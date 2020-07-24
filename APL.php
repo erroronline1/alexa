@@ -90,18 +90,6 @@ class BasicFunctions{
 			'permissions' => [ "alexa::alerts:reminders:skill:readwrite" ]
 		];
 	}
-	function askforreminderpermissionvoice(){
-		return [
-			'type' => 'Connections.SendRequest',
-			'name' => 'AskFor',
-			'payload' => [
-				'@type' => 'AskForPermissionsConsentRequest',
-				'@version' => '1',
-				'permissionScope' => 'alexa::alerts:reminders:skill:readwrite'
-			],
-			'token' => ''
-		];
-	}
 	function reminderconsent(){
 		return $this->post->context->System->user->permissions->consentToken || false;
 	}
@@ -783,9 +771,6 @@ class OutputFunctions{
 							]
 						]
 					]);
-			}
-			if ($this->voicepermission) {
-				array_push($responseArray['response']['directives'], $this->voicepermission);
 			}
 		}
 
