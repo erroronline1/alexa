@@ -2,12 +2,6 @@
 
 include ('nonpublic.php'); // application ids, database connections, etc.
 
-/* possible to do
-
-optional set up voice activated permission
->> https://developer.amazon.com/de-DE/docs/alexa/smapi/voice-permissions-for-reminders.html
-*/
-
 if ($ALEXA->verified($RemindmeAPPId)){
 	// $ALEXA->post->request->locale might be 'de_DE' or 'en_US' or something like that and can be used to determine language output
 	// since this shall support various english regions i concentrate on the language and not on the region
@@ -92,8 +86,7 @@ if ($ALEXA->verified($RemindmeAPPId)){
 											'en' => 'i will not longer remind you of ' . $param[0]],
 				'not_found' => [			'de' => 'ich habe dich vorher schon nicht an ' . $param[0] . ' erinnert.',
 											'en' => 'i did not remind you of ' . $param[0] . ' before.'],
-
-							];
+			];
 			return $answers[$chunk][$this->lang];
 		}
 	}
@@ -102,7 +95,6 @@ if ($ALEXA->verified($RemindmeAPPId)){
 	if ($ALEXA->post->request->type == "LaunchRequest" || $ALEXA->IntentName == "unset"){
 		$OUTPUT->speak = $answer2->get('start');
 		if (!$ALEXA->reminderconsent()) {
-//			$OUTPUT->voicepermission = $ALEXA->askforreminderpermissionvoice();
 			$OUTPUT->speak .= $answer2->get('reminder_permission') . $answer2->get('reminder_permission2');
 			$OUTPUT->permission = $ALEXA->askforreminderpermission($answer2->get('reminder_permission'));
 		}
