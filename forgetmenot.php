@@ -90,57 +90,57 @@ if ($ALEXA->verified($RemindmeAPPId)){
 			return $answers[$chunk][$this->lang];
 		}
 	}
-	$answer2=new answers($lang);
+	$answer=new answers($lang);
 	
 	if ($ALEXA->post->request->type == "LaunchRequest" || $ALEXA->IntentName == "unset"){
-		$OUTPUT->speak = $answer2->get('start');
+		$OUTPUT->speak = $answer->get('start');
 		if (!$ALEXA->reminderconsent()) {
-			$OUTPUT->speak .= $answer2->get('reminder_permission') . $answer2->get('reminder_permission2');
-			$OUTPUT->permission = $ALEXA->askforreminderpermission($answer2->get('reminder_permission'));
+			$OUTPUT->speak .= $answer->get('reminder_permission') . $answer->get('reminder_permission2');
+			$OUTPUT->permission = $ALEXA->askforreminderpermission($answer->get('reminder_permission'));
 		}
 		else {
-			if ($ALEXA->post->request->type == "LaunchRequest") $OUTPUT->speak = $answer2->get('welcomeback');
+			if ($ALEXA->post->request->type == "LaunchRequest") $OUTPUT->speak = $answer->get('welcomeback');
 			else $OUTPUT->speak = '';
 
 			$activereminders=$ALEXA->getactivereminders();
 			if (count($activereminders) > 1){
 				$result_array=[];
 				foreach ($activereminders as $key => $value){
-					if ($value!=0) $result_array[] = [$answer2->get('to'), str_replace($answer2->get('reminder_from'), '', $key)];
+					if ($value!=0) $result_array[] = [$answer->get('to'), str_replace($answer->get('reminder_from'), '', $key)];
 				}
 				for ($i=0 ; $i<count($result_array) ; $i++){
-					$result .= ($i < count($result_array)-1 || count($result_array) < 2) ? ', ' : ' ' . $answer2->get('conjunction') . ' ';
+					$result .= ($i < count($result_array)-1 || count($result_array) < 2) ? ', ' : ' ' . $answer->get('conjunction') . ' ';
 					$result .= implode(' ', $result_array[$i]);
 				}
 				$result = substr($result, 1);
 
-				$OUTPUT->speak .= $answer2->get('reminders', $result, $result_array[rand(0, count($result_array) - 1)][1]);
-				$OUTPUT->reprompt = $answer2->get('unset_reprompt');
+				$OUTPUT->speak .= $answer->get('reminders', $result, $result_array[rand(0, count($result_array) - 1)][1]);
+				$OUTPUT->reprompt = $answer->get('unset_reprompt');
 			}
-			else $OUTPUT->speak .= $answer2->get('no_reminders');
-			$OUTPUT->reprompt = $OUTPUT->reprompt ? : $answer2->get('help'); //learnt that a reprompt is expected on launch. the skill works otherwise but the console throws an error.
+			else $OUTPUT->speak .= $answer->get('no_reminders');
+			$OUTPUT->reprompt = $OUTPUT->reprompt ? : $answer->get('help'); //learnt that a reprompt is expected on launch. the skill works otherwise but the console throws an error.
 		}
 	}
 	elseif ($ALEXA->IntentName == "AMAZON.HelpIntent"){
-		$OUTPUT->speak = $OUTPUT->reprompt = $answer2->get('help');
+		$OUTPUT->speak = $OUTPUT->reprompt = $answer->get('help');
 	}
 	elseif ($ALEXA->IntentName == "set_topic"){
 		if (!$ALEXA->reminderconsent()) {
-			$OUTPUT->speak = $answer2->get('reminder_permission') . $answer2->get('reminder_permission2');
-			$OUTPUT->permission = $ALEXA->askforreminderpermission($answer2->get('reminder_permission'));
+			$OUTPUT->speak = $answer->get('reminder_permission') . $answer->get('reminder_permission2');
+			$OUTPUT->permission = $ALEXA->askforreminderpermission($answer->get('reminder_permission'));
 		}
 		else {
 			$topic = $ALEXA->post->request->intent->slots->topic->value;
 
 			$OUTPUT->sessionAttributes = ['TOPIC'=>$topic];
-			$OUTPUT->speak = $answer2->get('set_topic', $topic);
-			$OUTPUT->reprompt = $answer2->get('set_topic_reprompt');
+			$OUTPUT->speak = $answer->get('set_topic', $topic);
+			$OUTPUT->reprompt = $answer->get('set_topic_reprompt');
 		}
 	}
 	elseif ($ALEXA->IntentName == "set_time" || ($ALEXA->post->session->attributes->TOPIC && !$ALEXA->post->session->attributes->INTERVAL)){
 		if (!$ALEXA->reminderconsent()) {
-			$OUTPUT->speak = $answer2->get('reminder_permission') . $answer2->get('reminder_permission2');
-			$OUTPUT->permission = $ALEXA->askforreminderpermission($answer2->get('reminder_permission'));
+			$OUTPUT->speak = $answer->get('reminder_permission') . $answer->get('reminder_permission2');
+			$OUTPUT->permission = $ALEXA->askforreminderpermission($answer->get('reminder_permission'));
 		}
 		else {
 			$topic = $ALEXA->post->session->attributes->TOPIC;
@@ -149,15 +149,15 @@ if ($ALEXA->verified($RemindmeAPPId)){
 			if ($interval && $topic){
 				$duration = $ALEXA->resolveInterval($interval, $lang);
 				if ($duration['seconds']<$timelimit[0] || $duration['seconds']>$timelimit[1]){
-					$say= $answer2->get('errortimelimit');
+					$say= $answer->get('errortimelimit');
 				}
 				else {
-					$say = $answer2->get('set_time', $duration['speech'], $topic);
+					$say = $answer->get('set_time', $duration['speech'], $topic);
 					$OUTPUT->sessionAttributes = ['TOPIC' => $topic, 'INTERVAL' => $duration['seconds']];
 					$OUTPUT->reprompt = $say;
 				}
 			}
-			else $say = $answer2->get('error');
+			else $say = $answer->get('error');
 			$OUTPUT->speak = $say;
 		}
 	}
@@ -168,45 +168,45 @@ if ($ALEXA->verified($RemindmeAPPId)){
 		
 		if (key_exists($topic, $activereminders)) $ALEXA->deletereminder($activereminders[$topic]['id']);
 		
-		$set= $ALEXA->setrecurringreminder(['interval' => $interval, 'text' => $topic, 'ssml'=> '<speak>' . $answer2->get('reminder_from') . $topic . '</speak>', 'duration' => 3600*24*365], $ALEXA->post->request->timestamp);
+		$set= $ALEXA->setrecurringreminder(['interval' => $interval, 'text' => $topic, 'ssml'=> '<speak>' . $answer->get('reminder_from') . $topic . '</speak>', 'duration' => 3600*24*365], $ALEXA->post->request->timestamp);
 		if (!strstr($set[0], '1.1 201')){
-			$OUTPUT->speak = $answer2->get('errornotsupported');
+			$OUTPUT->speak = $answer->get('errornotsupported');
 			$OUTPUT->card->title = "error";
 			$OUTPUT->card->text = implode(' | ', $set);
 		}
 		else {
-			$OUTPUT->speak = $answer2->get('confirm_time', $ALEXA->tellTime($set[1], $lang), $topic);
+			$OUTPUT->speak = $answer->get('confirm_time', $ALEXA->tellTime($set[1], $lang), $topic);
 		}
 	}
 	elseif ($ALEXA->IntentName == "unset_topic"){
 		if (!$ALEXA->reminderconsent()) {
-			$OUTPUT->speak = $answer2->get('reminder_permission') . $answer2->get('reminder_permission2');
-			$OUTPUT->permission = $ALEXA->askforreminderpermission($answer2->get('reminder_permission'));
+			$OUTPUT->speak = $answer->get('reminder_permission') . $answer->get('reminder_permission2');
+			$OUTPUT->permission = $ALEXA->askforreminderpermission($answer->get('reminder_permission'));
 		}
 		else {
 			$topic = $ALEXA->post->request->intent->slots->topic->value;
 			$activereminders=$ALEXA->getactivereminders();
 			if (key_exists($topic, $activereminders)){
 				$ALEXA->deletereminder($activereminders[$topic]['id']);
-				$OUTPUT->speak = $answer2->get('deleted', $topic);
+				$OUTPUT->speak = $answer->get('deleted', $topic);
 			}
 			else {
-				$OUTPUT->speak = $answer2->get('not_found', $topic);
+				$OUTPUT->speak = $answer->get('not_found', $topic);
 			}
 		}
 	}
 	elseif ($ALEXA->IntentName == "AMAZON.HelpIntent"){
-		$OUTPUT->speak = $answer2->get('help');
-		$OUTPUT->card->title = $answer2->get('help_card_title');
+		$OUTPUT->speak = $answer->get('help');
+		$OUTPUT->card->title = $answer->get('help_card_title');
 		$OUTPUT->card->image = "https://erroronline.one/column4/sslmedia.php?../../asb/design/icon256x256.png";
-		$OUTPUT->card->text = $answer2->get('help_card_text');
+		$OUTPUT->card->text = $answer->get('help_card_text');
 	}
 	elseif ($ALEXA->IntentName == "AMAZON.StopIntent" || $ALEXA->IntentName == "AMAZON.CancelIntent" || $ALEXA->IntentName == "AMAZON.NoIntent"){
-		$OUTPUT->speak = $answer2->get('bye');
+		$OUTPUT->speak = $answer->get('bye');
 	}
 	else {
-		$OUTPUT->speak = $answer2->get('default');
-		$OUTPUT->reprompt = $answer2->get('help');
+		$OUTPUT->speak = $answer->get('default');
+		$OUTPUT->reprompt = $answer->get('help');
 	}
 	
 	$OUTPUT->answer();
