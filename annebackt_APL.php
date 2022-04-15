@@ -9,34 +9,32 @@ $num = $ALEXA->post->request->intent->slots->NUM->value;
 $contains = $ALEXA->post->request->intent->slots->CONTAINS->value;
 $receiptnumber = $ALEXA->post->request->intent->slots->RECEIPT_NUMBER->value;
 
-
-include('../../asb/backend/project.library.php');
-function getImage($id,$text){
-	global $project;
-	preg_match('/\<img src=[\"\'](.*?)[\"\'].*?>/is', $text, $bild);
-	if (!$bild[1]){
-		$bild = array(0);
-		$image_folder = "../../asb/".$project->image_folder;
-		if ($handle = opendir($image_folder)){
-			$list = array();
-			while (false !== ($file = readdir($handle))) {
-				if (is_file($image_folder.$file) && $file != ".htaccess" && $file != "." && $file != ".." && substr($file, 0, strpos($file, "_")) == $id) { 
-					$bild[]=$image_folder.$file;
-				}
-			}
-		} closedir($handle);
+function getImage($id, $post){
+	global $AnneBacktMysqli;
+	$attachment=$AnneBacktMysqli->query("SELECT meta_value FROM wp_postmeta WHERE post_id IN (SELECT meta_value FROM wp_postmeta WHERE post_id='15884') AND meta_key='_wp_attached_file'")->fetch_assoc();
+	if ($attachment->num_rows || $attachment['wp_postmeta']) {
+		return $attachment['wp_postmeta'];
+	} else {
+		preg_match('/\<img src=[\"\'](.*?)[\"\'].*?>/is', $post, $embeddedimage);
+		return $embeddedimage[1] ? $embeddedimage[1] : 'https://annebackt.de/wp-content/uploads/2021/12/ablogo.png';
 	}
-	return ($bild[1] ? $bild[1] : "../../asb/design/icon192x192.png");
+}
+
+function stripWPMarkup($post_content){
+	 return preg_replace(['/<!-- \/*wp:paragraph -->/', '/<!-- wp:gallery(?:.|\n|\r)*?\/wp:gallery -->/'], ['<br />', ''], $post_content);
+}
+
+function stripMarkup($post_content){
+	return preg_replace(['/<br.{0,2}>/'], ["\n\r"], $post_content);
 }
 
 function getArticle($id){
-	global $mysqli;
-	$entry = $mysqli->query("SELECT * FROM content WHERE id=" . $id . " AND timestamp<=UNIX_TIMESTAMP() LIMIT 1")->fetch_assoc();
-	$image = getImage($entry['id'], $entry['text']);
-	return ['title' => utf8_encode($entry['titel']),
-			'image' => 'https://erroronline.one/column4/sslmedia.php?' . $image,
-			'text' => utf8_encode($entry['text']) . "\r\n \r\nEin Rezept von annebackt.de",
-			'timestamp' => $entry['timestamp']];
+	global $AnneBacktMysqli;
+	$post = $AnneBacktMysqli->query("SELECT * FROM wp_posts WHERE id=" . $id . " LIMIT 1")->fetch_assoc();
+	return ['title' => utf8_encode($post['post_title']),
+			'image' => getImage($post['ID'], $post['post_content']),
+			'text' => utf8_encode(stripWPMarkup($post['post_content'])) . "\r\n \r\nEin Rezept von annebackt.de",
+			'permalink' => date("Y/m/d/", strtotime($post['post_date'])) . $post['post_name'] . '/'];
 }
 
 $stardardText='Frag:<br />"Was gibt es neues?"<br />'
@@ -58,7 +56,6 @@ if ($ALEXA->post->request->source->type =='TouchWrapper'){
 	$ALEXA->post->session->attributes->SelectableReceipts = $ALEXA->post->request->arguments[1];
 }
 
-
 if ($ALEXA->post->request->type == "LaunchRequest"){
 	$OUTPUT->speak = 'willkommen bei anne backt. was kann ich für dich tun?';
 	$OUTPUT->reprompt = 'wenn du nicht weiter weißt frag nach hilfe.';
@@ -75,10 +72,10 @@ elseif ($ALEXA->post->request->type == "IntentRequest"){
 		$OUTPUT->reprompt = $ALEXA->interject('hey').'! wenn du nicht weiter weißt, frag nach hilfe.';
 	}
 	elseif ($ALEXA->IntentName == "NEW_RECEIPTS" || $ALEXA->IntentName == "NEW_RECEIPT" || $ALEXA->IntentName == "SURPRISE"){
-		if ($ALEXA->IntentName == "NEW_RECEIPTS") $orderlimit = 'ORDER BY timestamp DESC LIMIT ' . ($num?:3);
-		elseif ($ALEXA->IntentName == "NEW_RECEIPT") $orderlimit = 'ORDER BY timestamp DESC LIMIT 1';
+		if ($ALEXA->IntentName == "NEW_RECEIPTS") $orderlimit = 'ORDER BY ID DESC LIMIT ' . ($num?:3);
+		elseif ($ALEXA->IntentName == "NEW_RECEIPT") $orderlimit = 'ORDER BY ID DESC LIMIT 1';
 		elseif ($ALEXA->IntentName == "SURPRISE") $orderlimit = 'ORDER BY RAND() LIMIT 1';
-		$list=$mysqli->query("SELECT * FROM content WHERE timestamp<=UNIX_TIMESTAMP() " . $orderlimit);
+		$list=$AnneBacktMysqli->query("SELECT * FROM wp_posts WHERE post_status='publish' AND post_type='post' " . $orderlimit);
 		if ($list->num_rows > 0) {
 			if ($list->num_rows > 1) $OUTPUT->speak = 'Die neuesten '.$list->num_rows.' Rezepte sind:';
 			else {
@@ -86,17 +83,21 @@ elseif ($ALEXA->post->request->type == "IntentRequest"){
 				elseif ($ALEXA->IntentName == "SURPRISE") $OUTPUT->speak = 'wie wäre es mit:';
 			}
 			$t_display['title'] = $OUTPUT->speak;
-			while($entry = $list->fetch_assoc()){
-				$OUTPUT->speak .= (++$items < $list->num_rows || $list->num_rows < 2 ? ', ' : " und ").($list->num_rows > 1 ? $ALEXA->number($items.'.') : '') . ' ' . utf8_encode($entry['titel']) . ' vom ' . $ALEXA->date(date('d.m.y', $entry['timestamp']));
-				$id.=','.$entry['id'];
+			while($post = $list->fetch_assoc()){
+				$OUTPUT->speak .= (++$items < $list->num_rows || $list->num_rows < 2 ? ', ' : " und ").($list->num_rows > 1 ? $ALEXA->number($items.'.') : '') . ' ' . utf8_encode($post['post_title']) . ' vom ' . $ALEXA->date(date('d.m.y', strtotime($post['post_date'])));
+				$id.=','.$post['ID'];
 
 				$t_display['items'][]=[
-					'token' => $entry['id'],
-					'listItemIdentifier' => $entry['id'],
+					'token' => $post['ID'],
+					'listItemIdentifier' => $post['ID'],
 					'ordinalNumber' => $items,
-					'image' => ['contentDescription' => 'icon','sources' => [['url' => 'https://erroronline.one/column4/sslmedia.php?' . getImage($entry['id'], $entry['text'])]]		],
-					'textContent' => ['primaryText' => ['text' => utf8_encode(preg_replace('/\//msi', '$0 ', $entry['titel'])), 'type' => 'PlainText'],
-									'secondaryText' =>['text' =>date('d.m.Y', $entry['timestamp']),'type' =>'PlainText'],
+					'image' => [
+						'contentDescription' => 'icon',
+						'sources' => [['url' => getImage($post['ID'], $post['post_content'])]]	
+					],
+					'textContent' => [
+						'primaryText' => ['text' => utf8_encode(preg_replace('/\//msi', '$0 ', $post['post_title'])), 'type' => 'PlainText'],
+						'secondaryText' =>['text' =>date('d.m.Y', strtotime($post['post_date'])),'type' =>'PlainText'],
 					]
 				];
 
@@ -122,25 +123,25 @@ elseif ($ALEXA->post->request->type == "IntentRequest"){
 	}
 	elseif ($ALEXA->IntentName == "LOOKUP_RECEIPTS" || $ALEXA->IntentName == "LOOKUP_RECEIPTS_BY_TITLE"){
 		if ($contains){
-			$column = $ALEXA->IntentName == 'LOOKUP_RECEIPTS' ? 'text' : 'titel';
-			$list=$mysqli->query("SELECT * FROM content WHERE " . $column . " LIKE '%" . $contains . "%' AND timestamp<=UNIX_TIMESTAMP() ORDER BY timestamp DESC");
+			$column = $ALEXA->IntentName == 'LOOKUP_RECEIPTS' ? 'post_content' : 'post_title';
+			$list=$mysqli->query("SELECT * FROM wp_posts WHERE " . $column . " LIKE '%" . $contains . "%' AND post_status='publish' and post_type='post' ORDER BY ID DESC");
 			if ($list->num_rows) {
 				$OUTPUT->speak = $ALEXA->IntentName == 'LOOKUP_RECEIPTS'?
 						'Es gibt ' . $list->num_rows . ' Rezepte mit ' . ucfirst($contains) . ': ':
 						'Es gibt ' . $list->num_rows . ' Rezepte für ' . ucfirst($contains) . ': ';
 
 				$t_display['title'] = $OUTPUT->speak;
-				while($entry = $list->fetch_assoc()){
-					$OUTPUT->speak .= (++$items < $list->num_rows || $list->num_rows < 2 ? ', ' : " und ") . ($list->num_rows > 1 ? $ALEXA->number($items . '.') : '') . ' ' . utf8_encode($entry['titel']) . ' vom ' . $ALEXA->date(date('d.m,Y', $entry['timestamp']));
-					$id .= ',' . $entry['id'];
+				while($post = $list->fetch_assoc()){
+					$OUTPUT->speak .= (++$items < $list->num_rows || $list->num_rows < 2 ? ', ' : " und ") . ($list->num_rows > 1 ? $ALEXA->number($items . '.') : '') . ' ' . utf8_encode($post['post_title']) . ' vom ' . $ALEXA->date(date('d.m,Y', strtotime($entry['post_date'])));
+					$id .= ',' . $post['ID'];
 
 					$t_display['items'][] = [
-						'token' => $entry['id'],
-						'listItemIdentifier' => $entry['id'],
+						'token' => $post['ID'],
+						'listItemIdentifier' => $post['ID'],
 						'ordinalNumber' => $items,
-						'image' => ['contentDescription' => 'icon', 'sources' => [['url' => 'https://erroronline.one/column4/sslmedia.php?' . getImage($entry['id'], $entry['text'])]]],
-						'textContent' => ['primaryText' => ['text' => utf8_encode(preg_replace('/\//msi', '$0 ', $entry['titel'])), 'type' => 'PlainText'],
-										'secondaryText' =>['text' =>date('d.m.Y', $entry['timestamp']),'type' =>'PlainText'],
+						'image' => ['contentDescription' => 'icon', 'sources' => [['url' => getImage($post['ID'], $post['post_content'])]]],
+						'textContent' => ['primaryText' => ['text' => utf8_encode(preg_replace('/\//msi', '$0 ', $post['post_title'])), 'type' => 'PlainText'],
+										'secondaryText' =>['text' =>date('d.m.Y', strtotime($entry['post_date'])),'type' =>'PlainText'],
 						]
 					];
 	
@@ -182,7 +183,7 @@ elseif ($ALEXA->post->request->type == "IntentRequest"){
 				$OUTPUT->speak = 'das rezept für ' . $article['title'] . ' wird auch in deiner alexa-app bei den aktivitäten angezeigt. möchtest du den link zu dem rezept per email zugesandt bekommen?';
 				$OUTPUT->card->title = $OUTPUT->display->title = 'Rezept für ' . $article['title'];
 				$OUTPUT->card->image = $OUTPUT->display->image = $article['image'];
-				$OUTPUT->card->text = $OUTPUT->display->text = $article['text'];
+				$OUTPUT->card->text = $OUTPUT->display->text = stripMarkup($article['text']);
 				$OUTPUT->display->hint = 'sag "ja" um den Link per eMail zu bekommen.';
 				$OUTPUT->sessionAttributes = ['SelectableReceipts' => $which[$receiptnumber-1], 'YesIntentConfirms' => 'sendreceipt'];
 
@@ -204,7 +205,7 @@ elseif ($ALEXA->post->request->type == "IntentRequest"){
 			$article = getArticle($which[$receiptnumber-1]);
 			$OUTPUT->card->title = $OUTPUT->display->title = 'Rezept für ' . $article['title'];
 			$OUTPUT->card->image = $OUTPUT->display->image = $article['image'];
-			$OUTPUT->card->text = $OUTPUT->display->text = $article['text'];
+			$OUTPUT->card->text = $OUTPUT->display->text = stripMarkup($article['text']);
 			$receiptfound=true;
 		}
 		else {
@@ -221,9 +222,15 @@ elseif ($ALEXA->post->request->type == "IntentRequest"){
 		}
 		else {
 			if ($receiptfound){
-				$raw = 'Das Rezept f&uuml;r <strong>' . $article['title'] . '</strong> findest du unter dem Link<br /><a href="http://annebackt.de/?permalink=' . base_convert($article['timestamp'], 10, 16) . '">http://annebackt.de/?permalink=' . base_convert($article['timestamp'], 10, 16) . '</a><br />'
+				$raw = 'Das Rezept f&uuml;r <strong>' . htmlentities(utf8_decode($article['title'])) . '</strong> findest du unter dem Link<br /><a href="https://annebackt.de/' . $article['permalink'] . '">https://annebackt.de/' . $article['permalink'] . '</a><br />'
 				.'<br /><small>Du hast im Alexa-Skill die Freigabe zur Nutzung Deiner eMail-Adresse und zur Zusendung des Links erteilt.</small>';
-				if (send_email('asb@annebackt.de', 'Anne backt via Alexa Skill', $usermail, 'Rezept für '.$article['title'], '', $raw, False,'annebackt.de')) $OUTPUT->speak = 'die email wurde versandt. kann ich sonst noch etwas für dich tun?';
+				if ($ALEXA->send_email('anne@annebackt.de',
+					'Anne backt via Alexa Skill',
+					$usermail,
+					htmlentities(utf8_decode('Rezept für '.$article['title'])),
+					$raw,
+					False,
+					'body {background:url("https://annebackt.de/wp-content/uploads/2021/11/bg.jpg")}')) $OUTPUT->speak = 'die email wurde versandt. kann ich sonst noch etwas für dich tun?';
 				else $OUTPUT->speak = 'die mail konnte leider nicht versendet werden. versuche es später oder sag mir über annebackt.de bescheid. möchtest du andere rezepte zumindest angezeigt bekommen?';
 				$OUTPUT->display->hint = 'du hast eine eMail an <strong>' . $usermail . '</strong> erhalten.';
 			}
@@ -239,7 +246,6 @@ elseif ($ALEXA->post->request->type == "IntentRequest"){
 		else {
 			$OUTPUT->speak = 'ich kann dir nicht folgen. frag nach einem rezept und probiere es aus!';
 			$OUTPUT->reprompt = 'frag mich einfach nach meinen rezepten und probier eines aus. also?';
-
 		}
 	}
 	elseif ($ALEXA->IntentName == "CRITICISE"){
@@ -249,12 +255,12 @@ elseif ($ALEXA->post->request->type == "IntentRequest"){
 	elseif ($ALEXA->IntentName == "AMAZON.HelpIntent"){
 		$OUTPUT->speak = 'dies ist ein skill der seite annebackt.de. stelle fragen wie: was sind die neuesten rezepte oder gibt es rezepte mit hefewasser - wobei hefewasser hier eine beliebige zutat ist. mehr optionen werden dir in der alexa-app angezeigt. versuchs mal!';
         $OUTPUT->card->title = 'Was kann der Annebackt.de-Skill?';
-        $OUTPUT->card->image = "https://erroronline.one/column4/sslmedia.php?../../asb/design/icon192x192.png";
-		$OUTPUT->card->text = str_replace(["<br />", "<em>", "</em>"], ["\r\n", "", ""], $stardardText)
+        $OUTPUT->card->image = 'https://annebackt.de/wp-content/uploads/2021/12/ablogo.png';
+		$OUTPUT->card->text = str_replace(['<br />', '<em>', '</em>'], ["\r\n", '', ''], $stardardText)
 			."Du kannst dir die Rezepte in der App anzeigen und per eMail zusenden lassen. "
 			."Wenn es mehr als ein Rezept auf deine Frage hin gibt sage\r\n"
-			."\"Zeige mir Rezept Nummer (z.B.) zwei.\" oder \r\n"
-			."\"Schicke mir Rezept drei.\"\r\n \r\n"
+			."'Zeige mir Rezept Nummer (z.B.) zwei.' oder \r\n"
+			."'Schicke mir Rezept drei.'\r\n \r\n"
 			."Zur Nutzung der eMail-Funktion musst du dem Skill die Freigabe erteilen.";
 
 		$OUTPUT->display->displaytemplate = 'BodyTemplate1';
@@ -302,7 +308,7 @@ elseif ($ALEXA->post->request->type == "IntentRequest"){
 		$catpic= json_decode(file_get_contents('https://api.pexels.com/v1/search?query=kitten&per_page=100', false, $context));
 		$randcat=$catpic->photos[random_int(0,count($catpic->photos)-1)];
 						
-		$OUTPUT->card->image = $OUTPUT->display->image = $randcat->src->medium; //"https://erroronline.one/column4/sslmedia.php?../../asb/design/icon192x192.png";
+		$OUTPUT->card->image = $OUTPUT->display->image = $randcat->src->medium;
 		$OUTPUT->card->text = $OUTPUT->display->text = "Hier, ein Bild von einer Katze...";
 		$OUTPUT->card->subtext = $OUTPUT->display->subtext = "(von " . $randcat->photographer . ")";
 	}
@@ -310,8 +316,8 @@ elseif ($ALEXA->post->request->type == "IntentRequest"){
 
 //	$OUTPUT->display->token='Anne backt';
 //	$OUTPUT->display->title='Anne backt';
-	$OUTPUT->display->bgimage = 'https://erroronline.one/column4/sslmedia.php?../../asb/design/bg.jpg';//.getImage('','');
-	$OUTPUT->display->skillogo = 'https://erroronline.one/column4/sslmedia.php?../../asb/design/icon192x192w.png';
+	$OUTPUT->display->bgimage = 'https://annebackt.de/wp-content/uploads/2021/11/bg.jpg';//.getImage('','');
+	$OUTPUT->display->skillogo = 'https://annebackt.de/wp-content/uploads/2021/12/ablogo.png';
     $OUTPUT->display->styles = [
         'textStylePrimary' => [
             'values' => [
@@ -328,15 +334,15 @@ elseif ($ALEXA->post->request->type == "IntentRequest"){
             ]
         ],
         'customHeader' => [
-            'values' =>[
+            'values' => [
                 'color' => '#000000',
                 'fontSize' => 27,
-                'backgroundColor' => '#EBB1D7',
+                'backgroundColor' => 'transparent', //'#EBB1D7',
                 'textAlignVertical' => 'center'
                 ]
         ],
         'customHint' => [
-            'values' =>[
+            'values' => [
                 'color' => '#000000aa',
                 'fontFamily' => 'Bookerly',
                 'fontStyle' => 'italic',
@@ -352,7 +358,7 @@ elseif ($ALEXA->post->request->type == "IntentRequest"){
                 'bodyHeight' => '70vh',
                 'bodyPaddingTopBottom' => 16,
                 'bodyPaddingLeftRight' => 32
-        ]
+      		]
         ]
     ];
 
