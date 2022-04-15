@@ -6,11 +6,13 @@ class BasicFunctions{
 |___||_|_| \_/     \_/ |__,||_|  |___|
 
 */
+
 	public $rawpost;
 	public $post;
 	public $AccessToken;
 	public $IntentName;
 	public $apiEndpoint;
+	public $lang;
 
 	function __construct($rawpost){
 		$this->rawpost = $rawpost;
@@ -76,6 +78,25 @@ class BasicFunctions{
 		// Open the file using the HTTP headers set above
 		return json_decode(file_get_contents($this->apiEndpoint . '/v2/accounts/~current/settings/Profile.email', false, $context));
 	}
+	function send_email($sendermail, $sendername, $mailto, $subject, $text, $replymail=False, $style=''){
+		$host = $_SERVER['HTTP_HOST'];
+		$header = "MIME-Version: 1.0\n"; 
+		$header .= "Content-type: text/html; charset=iso-8859-1\n"; 
+		$header .= "From:" . $sendername . (!$sendermail ? : "<" . $sendermail . ">") . "\n";
+		if ($replymail) $header .= "Reply-To: ".$replymail."\n";
+	 
+		$content='<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">
+		<HTML><HEAD>
+		<META http-equiv=Content-Type content=\"text/html; charset=utf-8\">
+		<META content=\"MSHTML 6.00.2800.1505\" name=GENERATOR>
+		<style>'.$style.'
+		</style>
+		</HEAD>
+		<BODY>';
+		$content .= "<h2>".$subject."</h2>";
+		$content .= $text;
+		return mail($mailto, "=?iso-8859-1?b?" . base64_encode(utf8_decode($subject)) . "?=", utf8_encode($content), $header);
+	}
 	
 /*
                   _         _               _                _  _  _
@@ -88,6 +109,18 @@ class BasicFunctions{
 			'type' => 'AskForPermissionsConsent',
 			'title' => $title,
 			'permissions' => [ "alexa::alerts:reminders:skill:readwrite" ]
+		];
+	}
+	function askforreminderpermissionvoice(){
+		return [
+			'type' => 'Connections.SendRequest',
+			'name' => 'AskFor',
+			'payload' => [
+				'@type' => 'AskForPermissionsConsentRequest',
+				'@version' => '1',
+				'permissionScope' => 'alexa::alerts:reminders:skill:readwrite'
+			],
+			'token' => ''
 		];
 	}
 	function reminderconsent(){
@@ -147,10 +180,9 @@ class BasicFunctions{
 			}
 			//sanitize
 			$recurrenceRules=array_slice($recurrenceRules, 1, -1);
-			$nextreminder -= 1;
 			//determine next occurence
 			if ($nextreminder > count($recurrenceRules)) $nextreminder = $recurrenceRules[0][1];
-			else $nextreminder = $recurrenceRules[$nextreminder][1];
+			else $nextreminder = $recurrenceRules[$nextreminder - 2][1];
 
 			foreach($recurrenceRules as $item){
 				array_push($rulesOutput, $item[0]);
@@ -349,21 +381,21 @@ class OutputFunctions{
 			$styles = $this->display->styles != null ? $this->display->styles : [
 				'textStylePrimary' => [
 					'values' => [
-						'color' => '#000000',
+						'color' => '#ffffff',
 						'fontSize' => 25,
 						'fontWeight' => 100
 					]
 				],
 				'textStyleSecondary' => [
 					'values' => [
-						'color' => '#000000',
+						'color' => '#ffffff',
 						'fontSize' => 20,
 						'fontWeight' => 100
 					]
 				],
 				'customHeader' => [
-					'values' =>[
-						'color' => '#000000',
+					'values' => [
+						'color' => '#ffffff',
 						'fontSize' => 27,
 						'backgroundColor' => '',
 						'textAlignVertical' => 'center'
@@ -371,7 +403,7 @@ class OutputFunctions{
 				],
 				'customHint' => [
 					'values' => [
-						'color' => '#000000',
+						'color' => '#ffffff',
 						'fontFamily' => 'Bookerly',
 						'fontStyle' => 'italic',
 						'fontSize' => 22,
@@ -771,6 +803,9 @@ class OutputFunctions{
 							]
 						]
 					]);
+			}
+			if ($this->voicepermission) {
+				array_push($responseArray['response']['directives'], $this->voicepermission);
 			}
 		}
 
