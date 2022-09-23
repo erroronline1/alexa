@@ -31,9 +31,9 @@ function stripMarkup($post_content){
 function getArticle($id){
 	global $AnneBacktMysqli;
 	$post = $AnneBacktMysqli->query("SELECT * FROM wp_posts WHERE id=" . $id . " LIMIT 1")->fetch_assoc();
-	return ['title' => utf8_encode($post['post_title']),
+	return ['title' => $post['post_title'],
 			'image' => getImage($post['ID'], $post['post_content']),
-			'text' => utf8_encode(stripWPMarkup($post['post_content'])) . "\r\n \r\nEin Rezept von annebackt.de",
+			'text' => stripWPMarkup($post['post_content']) . "\r\n \r\nEin Rezept von annebackt.de",
 			'permalink' => date("Y/m/d/", strtotime($post['post_date'])) . $post['post_name'] . '/'];
 }
 
@@ -84,7 +84,7 @@ elseif ($ALEXA->post->request->type == "IntentRequest"){
 			}
 			$t_display['title'] = $OUTPUT->speak;
 			while($post = $list->fetch_assoc()){
-				$OUTPUT->speak .= (++$items < $list->num_rows || $list->num_rows < 2 ? ', ' : " und ").($list->num_rows > 1 ? $ALEXA->number($items.'.') : '') . ' ' . utf8_encode($post['post_title']) . ' vom ' . $ALEXA->date(date('d.m.y', strtotime($post['post_date'])));
+				$OUTPUT->speak .= (++$items < $list->num_rows || $list->num_rows < 2 ? ', ' : " und ").($list->num_rows > 1 ? $ALEXA->number($items.'.') : '') . ' ' . $post['post_title'] . ' vom ' . $ALEXA->date(date('d.m.y', strtotime($post['post_date'])));
 				$id.=','.$post['ID'];
 
 				$t_display['items'][]=[
@@ -96,7 +96,7 @@ elseif ($ALEXA->post->request->type == "IntentRequest"){
 						'sources' => [['url' => getImage($post['ID'], $post['post_content'])]]	
 					],
 					'textContent' => [
-						'primaryText' => ['text' => utf8_encode(preg_replace('/\//msi', '$0 ', $post['post_title'])), 'type' => 'PlainText'],
+						'primaryText' => ['text' => preg_replace('/\//msi', '$0 ', $post['post_title']), 'type' => 'PlainText'],
 						'secondaryText' =>['text' =>date('d.m.Y', strtotime($post['post_date'])),'type' =>'PlainText'],
 					]
 				];
@@ -124,7 +124,7 @@ elseif ($ALEXA->post->request->type == "IntentRequest"){
 	elseif ($ALEXA->IntentName == "LOOKUP_RECEIPTS" || $ALEXA->IntentName == "LOOKUP_RECEIPTS_BY_TITLE"){
 		if ($contains){
 			$column = $ALEXA->IntentName == 'LOOKUP_RECEIPTS' ? 'post_content' : 'post_title';
-			$list=$mysqli->query("SELECT * FROM wp_posts WHERE " . $column . " LIKE '%" . $contains . "%' AND post_status='publish' and post_type='post' ORDER BY ID DESC");
+			$list=$AnneBacktMysqli->query("SELECT * FROM wp_posts WHERE " . $column . " LIKE '%" . $contains . "%' AND post_status='publish' and post_type='post' ORDER BY ID DESC");
 			if ($list->num_rows) {
 				$OUTPUT->speak = $ALEXA->IntentName == 'LOOKUP_RECEIPTS'?
 						'Es gibt ' . $list->num_rows . ' Rezepte mit ' . ucfirst($contains) . ': ':
@@ -132,7 +132,7 @@ elseif ($ALEXA->post->request->type == "IntentRequest"){
 
 				$t_display['title'] = $OUTPUT->speak;
 				while($post = $list->fetch_assoc()){
-					$OUTPUT->speak .= (++$items < $list->num_rows || $list->num_rows < 2 ? ', ' : " und ") . ($list->num_rows > 1 ? $ALEXA->number($items . '.') : '') . ' ' . utf8_encode($post['post_title']) . ' vom ' . $ALEXA->date(date('d.m,Y', strtotime($entry['post_date'])));
+					$OUTPUT->speak .= (++$items < $list->num_rows || $list->num_rows < 2 ? ', ' : " und ") . ($list->num_rows > 1 ? $ALEXA->number($items . '.') : '') . ' ' . $post['post_title'] . ' vom ' . $ALEXA->date(date('d.m.Y', strtotime($post['post_date'])));
 					$id .= ',' . $post['ID'];
 
 					$t_display['items'][] = [
@@ -140,8 +140,8 @@ elseif ($ALEXA->post->request->type == "IntentRequest"){
 						'listItemIdentifier' => $post['ID'],
 						'ordinalNumber' => $items,
 						'image' => ['contentDescription' => 'icon', 'sources' => [['url' => getImage($post['ID'], $post['post_content'])]]],
-						'textContent' => ['primaryText' => ['text' => utf8_encode(preg_replace('/\//msi', '$0 ', $post['post_title'])), 'type' => 'PlainText'],
-										'secondaryText' =>['text' =>date('d.m.Y', strtotime($entry['post_date'])),'type' =>'PlainText'],
+						'textContent' => ['primaryText' => ['text' => preg_replace('/\//msi', '$0 ', $post['post_title']), 'type' => 'PlainText'],
+										'secondaryText' =>['text' =>date('d.m.Y', strtotime($post['post_date'])),'type' =>'PlainText'],
 						]
 					];
 	
@@ -222,12 +222,12 @@ elseif ($ALEXA->post->request->type == "IntentRequest"){
 		}
 		else {
 			if ($receiptfound){
-				$raw = 'Das Rezept f&uuml;r <strong>' . htmlentities(utf8_decode($article['title'])) . '</strong> findest du unter dem Link<br /><a href="https://annebackt.de/' . $article['permalink'] . '">https://annebackt.de/' . $article['permalink'] . '</a><br />'
+				$raw = 'Das Rezept f&uuml;r <strong>' . htmlentities($article['title']) . '</strong> findest du unter dem Link<br /><a href="https://annebackt.de/' . $article['permalink'] . '">https://annebackt.de/' . $article['permalink'] . '</a><br />'
 				.'<br /><small>Du hast im Alexa-Skill die Freigabe zur Nutzung Deiner eMail-Adresse und zur Zusendung des Links erteilt.</small>';
 				if ($ALEXA->send_email('anne@annebackt.de',
 					'Anne backt via Alexa Skill',
 					$usermail,
-					htmlentities(utf8_decode('Rezept für '.$article['title'])),
+					htmlentities('Rezept für '.$article['title']),
 					$raw,
 					False,
 					'body {background:url("https://annebackt.de/wp-content/uploads/2021/11/bg.jpg")}')) $OUTPUT->speak = 'die email wurde versandt. kann ich sonst noch etwas für dich tun?';

@@ -95,7 +95,7 @@ class BasicFunctions{
 		<BODY>';
 		$content .= "<h2>".$subject."</h2>";
 		$content .= $text;
-		return mail($mailto, "=?iso-8859-1?b?" . base64_encode(utf8_decode($subject)) . "?=", utf8_encode($content), $header);
+		return mail($mailto, "=?iso-8859-1?b?" . base64_encode(utf8_decode(html_entity_decode($subject))) . "?=", utf8_encode($content), $header);
 	}
 	
 /*
@@ -274,9 +274,32 @@ class BasicFunctions{
 }
 
 class OutputFunctions{
+
+	var $display;
+	var $card;
+
 	function __construct($post, $AccessToken){
 		$this->post = $post;
 		$this->AccessToken = $AccessToken;
+		$this->display = (object)[
+			'bgimage' => '',
+			'title' => '',
+			'text' => '',
+			'hint' => '',
+			'displaytemplate' => '',
+			'token' => '',
+			'items' => '',
+			'image' => '',
+			'skilllogo' => '',
+			'styles' => [],
+			'resources' => []
+		];
+		$this->card = (object)[
+			'title' => '',
+			'text' => '',
+			'image' => '',
+			'subtext' => '',
+		];
 	}
 
 	function debug($str, $where = "json"){
@@ -316,7 +339,7 @@ class OutputFunctions{
 |  _|| .'||  _|| . |
 |___||__,||_|  |___|
 
-*/		if ($this->card) $responseArray['response']['card'] = 
+*/		if ($this->card->image) $responseArray['response']['card'] = 
 			[
 				'type' => 'Standard',
 				'title' => $this->card->title,
@@ -337,7 +360,7 @@ class OutputFunctions{
                          |_|        |___|
 
 */		// support for non APL enabled deviced
-		if ($this->post->context->System->device->supportedInterfaces->Display && !$this->post->context->System->device->supportedInterfaces->Alexa.Presentation.APL && $this->display) $responseArray['response']['directives']=[
+		if ($this->post->context->System->device->supportedInterfaces->Display && !$this->post->context->System->device->supportedInterfaces->{'Alexa.Presentation.APL'} && $this->display) $responseArray['response']['directives']=[
 			[
 				'type' => "Display.RenderTemplate",
 				'template' => [
@@ -376,7 +399,7 @@ class OutputFunctions{
      |_|        |___|
 
 */		//support for APL enabled devices
-		if ($this->post->context->System->device->supportedInterfaces->Display && $this->post->context->System->device->supportedInterfaces->Alexa.Presentation.APL && $this->display) {
+		if ($this->post->context->System->device->supportedInterfaces->Display && $this->post->context->System->device->supportedInterfaces->{'Alexa.Presentation.APL'} && $this->display) {
 			
 			$styles = $this->display->styles != null ? $this->display->styles : [
 				'textStylePrimary' => [
